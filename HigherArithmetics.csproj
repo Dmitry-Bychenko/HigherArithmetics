@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>HigherArithmetics.snk</AssemblyOriginatorKeyFile>
+    <Authors>Dmitry Bychenko</Authors>
+    <Product>Higher Arithmetics (Number Theory) library</Product>
+    <Description>Number Theory; Integer Math library</Description>
+    <Copyright>Copyright (c) 2021 by Dmitry Bychenko</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+</Project>
