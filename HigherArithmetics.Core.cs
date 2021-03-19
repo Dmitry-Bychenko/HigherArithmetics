@@ -1,6 +1,6 @@
 ﻿using System;
 
 [assembly: CLSCompliant(true)]
-namespace HigherArithmetic {
+namespace HigherArithmetics {
 
 }
