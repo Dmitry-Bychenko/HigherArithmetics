@@ -64,7 +64,7 @@ namespace HigherArithmetics.Primes {
     /// <summary>
     /// Prime divisors
     /// </summary>
-    public static IEnumerable<BigInteger> PrimeDivisorsFlat(this BigInteger value) {
+    public static IEnumerable<BigInteger> PrimeDivisorsExpanded(this BigInteger value) {
       if (value <= 1)
         yield break;
 
@@ -131,7 +131,7 @@ namespace HigherArithmetics.Primes {
       BigInteger prior = 0;
       int count = 0;
 
-      foreach (BigInteger p in PrimeDivisorsFlat(value)) {
+      foreach (BigInteger p in PrimeDivisorsExpanded(value)) {
         if (p == prior)
           count += 1;
         else {
@@ -150,10 +150,10 @@ namespace HigherArithmetics.Primes {
     /// <summary>
     /// Prime Divisors
     /// </summary>
-    public static IEnumerable<BigInteger> DistinctPrimeDivisors(this BigInteger value) {
+    public static IEnumerable<BigInteger> PrimeDivisorsDistinc(this BigInteger value) {
       BigInteger prior = 0;
 
-      foreach (BigInteger p in PrimeDivisorsFlat(value)) {
+      foreach (BigInteger p in PrimeDivisorsExpanded(value)) {
         if (p != prior) {
           yield return p;
 
@@ -171,7 +171,7 @@ namespace HigherArithmetics.Primes {
       else if (value == 1)
         return new BigInteger[] { 1 };
 
-      return CoreAllDivisors(PrimeDivisorsFlat(value));
+      return CoreAllDivisors(PrimeDivisorsExpanded(value));
     }
 
     #endregion Public

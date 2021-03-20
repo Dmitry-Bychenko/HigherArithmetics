@@ -252,7 +252,7 @@ namespace HigherArithmetics {
       int count = 0;
       BigInteger prior = 0;
 
-      foreach (BigInteger p in Divisors.PrimeDivisorsFlat(value)) {
+      foreach (BigInteger p in Divisors.PrimeDivisorsExpanded(value)) {
         if (p == prior)
           return 0;
 
@@ -269,7 +269,7 @@ namespace HigherArithmetics {
     public static BigInteger Totient(this BigInteger value) {
       BigInteger result = value;
 
-      foreach (BigInteger div in Divisors.DistinctPrimeDivisors(value))
+      foreach (BigInteger div in Divisors.PrimeDivisorsDistinc(value))
         result = (result / div) * (div - 1);
 
       return result;
@@ -294,7 +294,7 @@ namespace HigherArithmetics {
         ? value / 2
         : value;
 
-      List<BigInteger> divisors = number.DistinctPrimeDivisors().Take(2).ToList();
+      List<BigInteger> divisors = number.PrimeDivisorsDistinc().Take(2).ToList();
 
       if (divisors.Count == 2)
         return 0;
@@ -307,7 +307,7 @@ namespace HigherArithmetics {
       foreach (BigInteger div in divisors)
         fi = fi / div * (div - 1);
 
-      List<BigInteger> ps = fi.DistinctPrimeDivisors().ToList();
+      List<BigInteger> ps = fi.PrimeDivisorsDistinc().ToList();
       ps.Add(1);
 
       HashSet<BigInteger> hs = new HashSet<BigInteger>();
@@ -361,7 +361,7 @@ namespace HigherArithmetics {
         ? value / 2
         : value;
 
-      List<BigInteger> divisors = number.DistinctPrimeDivisors().Take(2).ToList();
+      List<BigInteger> divisors = number.PrimeDivisorsDistinc().Take(2).ToList();
 
       if (divisors.Count == 2)
         return false;
@@ -374,7 +374,7 @@ namespace HigherArithmetics {
       foreach (BigInteger div in divisors)
         fi = fi / div * (div - 1);
 
-      List<BigInteger> ps = fi.DistinctPrimeDivisors().ToList();
+      List<BigInteger> ps = fi.PrimeDivisorsDistinc().ToList();
       ps.Add(1);
 
       HashSet<BigInteger> hs = new HashSet<BigInteger>();
