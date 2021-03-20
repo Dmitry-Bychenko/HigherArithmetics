@@ -65,7 +65,7 @@ namespace HigherArithmetics {
         return value;
 
       if (value % 2 == 0)
-        return DoubleFactorial(value / 2) * BigInteger.Pow(2, value / 2);
+        return Factorial(value / 2) * BigInteger.Pow(2, value / 2);
 
       if (value < 1000)
         return Factorial(value) / BigInteger.Pow(2, value / 2) / Factorial(value / 2);
@@ -94,7 +94,7 @@ namespace HigherArithmetics {
 
       BigInteger result = 1;
 
-      for (int d = from; d < from - take; --d)
+      for (int d = from; d > from - take; --d)
         result *= d;
 
       return result;
@@ -116,7 +116,7 @@ namespace HigherArithmetics {
 
       BigInteger result = 1;
 
-      for (int d = from; d < from - take; --d)
+      for (int d = from; d > from - take; --d)
         result *= d;
 
       return result / Factorial(take);
