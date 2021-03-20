@@ -56,9 +56,9 @@ namespace HigherArithmetics.Primes {
         }
       }
 
-      Interlocked.Exchange(ref current, m_Primes);
+      var was = Interlocked.CompareExchange(ref m_Primes, next, current);
 
-      if (current.Count >= next.Count)
+      if (ReferenceEquals(was, current))
         return;
 
       lock (m_Primes) {
