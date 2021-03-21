@@ -1,5 +1,7 @@
 # Discrete Math library 
 
+[![NuGet version (HigherArithmetics)](https://img.shields.io/nuget/v/HigherArithmetics.svg?style=flat-square)](https://www.nuget.org/packages/HigherArithmetics/) 
+
 This **.Net** routine uses `System.Numerics.BigInteger`
 
 ## Examples:
