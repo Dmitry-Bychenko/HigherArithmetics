@@ -1,11 +1,10 @@
-﻿using System;
+﻿using HigherArithmetics.Numerics;
+using HigherArithmetics.Primes;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-
-using HigherArithmetics.Numerics;
-using HigherArithmetics.Primes;
 
 namespace HigherArithmetics {
 
@@ -20,8 +19,7 @@ namespace HigherArithmetics {
   public static class DiscreteMath {
     #region Private Data
 
-    private static ConcurrentDictionary<int, BigInteger> s_Factorials =
-      new ConcurrentDictionary<int, BigInteger>();
+    private static readonly ConcurrentDictionary<int, BigInteger> s_Factorials = new();
 
     #endregion Private Data
 
@@ -76,6 +74,31 @@ namespace HigherArithmetics {
         result *= 3;
 
       return result;
+    }
+
+    // !n = (n - 1)(!(n - 1) + !(n - 2)); !0 = 1; !1 = 0 
+    /// <summary>
+    /// Subfactorial !value
+    /// </summary>
+    public static BigInteger SubFactorial(int value) {
+      if (value < 0)
+        throw new ArgumentOutOfRangeException(nameof(value));
+
+      if (value == 0)
+        return 1;
+      if (value == 1)
+        return 0;
+
+      BigInteger a = 1;
+      BigInteger b = 0;
+
+      for (int n = 2; n <= value; ++n) {
+        BigInteger z = (n - 1) * (b + a);
+        a = b;
+        b = z;
+      }
+
+      return b;
     }
 
     /// <summary>
@@ -231,7 +254,7 @@ namespace HigherArithmetics {
       IEnumerable<T> source,
       int take,
       bool withRepetitions,
-      bool orderMatters) where T : IComparable<T> => 
+      bool orderMatters) where T : IComparable<T> =>
       CombinationsCount(source, take, withRepetitions, orderMatters, null);
 
     #endregion General
@@ -310,7 +333,7 @@ namespace HigherArithmetics {
       List<BigInteger> ps = fi.PrimeDivisorsDistinc().ToList();
       ps.Add(1);
 
-      HashSet<BigInteger> hs = new HashSet<BigInteger>();
+      HashSet<BigInteger> hs = new();
 
       for (BigInteger g = 1; g < value; ++g) {
         if (g.Gcd(value) != 1)
@@ -377,7 +400,7 @@ namespace HigherArithmetics {
       List<BigInteger> ps = fi.PrimeDivisorsDistinc().ToList();
       ps.Add(1);
 
-      HashSet<BigInteger> hs = new HashSet<BigInteger>();
+      HashSet<BigInteger> hs = new();
 
       hs.Clear();
 

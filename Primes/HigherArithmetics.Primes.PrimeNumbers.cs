@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.Numerics;
 using System.Security.Cryptography;
-using System.Threading;
 using System.Threading.Tasks;
 
-using HigherArithmetics.Numerics;
-
 namespace HigherArithmetics.Primes {
-  
+
   //-------------------------------------------------------------------------------------------------------------------
   //
   /// <summary>
@@ -79,7 +76,7 @@ namespace HigherArithmetics.Primes {
     /// Primes
     /// </summary>
     public static IEnumerable<BigInteger> Generate() {
-      List<BigInteger> primes = new ();
+      List<BigInteger> primes = new();
 
       yield return 2;
       yield return 3;
@@ -138,11 +135,11 @@ namespace HigherArithmetics.Primes {
         return KnownPrimes.IsKnownPrime((int)value);
 
       long max = 11;
-           
+
       if (value < long.MaxValue) {
         long lv = (long)value;
         max = 11;
-        long n = (long) (Math.Sqrt(lv) + 1000);
+        long n = (long)(Math.Sqrt(lv) + 1000);
 
         foreach (int v in KnownPrimes.Primes) {
           if (v > n || v >= lv)
@@ -160,7 +157,7 @@ namespace HigherArithmetics.Primes {
         return true;
       }
 
-      foreach (int v in KnownPrimes.Primes) { 
+      foreach (int v in KnownPrimes.Primes) {
         if (value % v == 0)
           return false;
 
@@ -252,7 +249,7 @@ namespace HigherArithmetics.Primes {
     /// <param name="value">Value to test</param>
     /// <returns>False if not prime, true if probably prime</returns>
     public static bool IsProbablePrime(this BigInteger value) => IsProbablePrime(value, 10);
-    
+
     #endregion Public 
   }
 

@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HigherArithmetics.Numerics {
 
@@ -42,7 +40,7 @@ namespace HigherArithmetics.Numerics {
     /// </summary>
     public static BigInteger ModNegate(this BigInteger value, BigInteger mod) =>
       Remainder(-value, mod);
-    
+
     /// <summary>
     /// Greatest Common Divisor
     /// </summary>

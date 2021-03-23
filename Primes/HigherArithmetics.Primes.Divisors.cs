@@ -1,11 +1,8 @@
-﻿using System;
+﻿using HigherArithmetics.Numerics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-
-using HigherArithmetics.Numerics;
 
 namespace HigherArithmetics.Primes {
 
@@ -28,7 +25,7 @@ namespace HigherArithmetics.Primes {
 
       int[] indexes = new int[divs.Length];
 
-      List<BigInteger> result = new List<BigInteger>();
+      List<BigInteger> result = new();
 
       do {
         BigInteger value = 1;
@@ -70,7 +67,7 @@ namespace HigherArithmetics.Primes {
 
       long max = 3;
       BigInteger root = value.Sqrt();
-      
+
       foreach (int d in KnownPrimes.Primes) {
         bool divides = false;
 
@@ -99,7 +96,7 @@ namespace HigherArithmetics.Primes {
 
         yield break;
       }
-           
+
       for (long d = max + 2; d < long.MaxValue - 3; d += 2) {
         bool divides = false;
 
