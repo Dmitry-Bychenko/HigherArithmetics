@@ -134,8 +134,11 @@ namespace HigherArithmetics.Primes {
       if ((value % 11) == 0)
         return (value == 11);
 
-      long max = 11;
+      if (value <= KnownPrimes.MaxKnownPrime)
+        return KnownPrimes.IsKnownPrime((int)value);
 
+      long max = 11;
+           
       if (value < long.MaxValue) {
         long lv = (long)value;
         max = 11;
@@ -225,6 +228,9 @@ namespace HigherArithmetics.Primes {
       if ((value % 11) == 0)
         return (value == 11);
 
+      if (value <= KnownPrimes.MaxKnownPrime)
+        return KnownPrimes.IsKnownPrime((int)value);
+
       if (value < 1_000_000_000_000L) {
         int nn = (int)(Math.Sqrt((double)value) + 1);
         long lv = (long)value;
@@ -248,7 +254,6 @@ namespace HigherArithmetics.Primes {
     public static bool IsProbablePrime(this BigInteger value) => IsProbablePrime(value, 10);
     
     #endregion Public 
-
   }
 
 }

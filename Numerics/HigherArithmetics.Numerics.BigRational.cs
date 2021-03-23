@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Runtime.Serialization;
 
 namespace HigherArithmetics.Numerics {
 
@@ -12,8 +13,48 @@ namespace HigherArithmetics.Numerics {
   //
   //-------------------------------------------------------------------------------------------------------------------
 
-  public struct BigRational : IEquatable<BigRational>, IComparable<BigRational> {
+  public struct BigRational : IEquatable<BigRational>, IComparable<BigRational>, ISerializable {
     #region Create
+
+    // Deserialization
+    private BigRational(SerializationInfo info, StreamingContext context) {
+      if (info is null)
+        throw new ArgumentNullException(nameof(info));
+
+      var numerator = BigInteger.Parse(info.GetString("Numerator"));
+      var denominator = BigInteger.Parse(info.GetString("Denominator"));
+
+      if (numerator < 0 && denominator < 0) {
+        numerator = -numerator;
+        denominator = -denominator;
+      }
+      else if (numerator == 0) {
+        if (denominator != 0)
+          denominator = 1;
+      }
+      else if (denominator == 0) {
+        if (numerator < 0)
+          numerator = -1;
+        else
+          numerator = 1;
+      }
+      else if (denominator < 0) {
+        numerator = -numerator;
+        denominator = -denominator;
+      }
+
+      if (denominator == 0) {
+        Numerator = numerator;
+        Denominator = denominator;
+      }
+      else {
+        var gcd = BigInteger.GreatestCommonDivisor(denominator, numerator < 0 ? -numerator : numerator);
+
+        Numerator = numerator / gcd;
+        Denominator = denominator / gcd;
+      }
+
+    }
 
     /// <summary>
     /// Standard rational constructor
@@ -499,6 +540,21 @@ namespace HigherArithmetics.Numerics {
     public int CompareTo(BigRational other) => Compare(this, other);
 
     #endregion IComparable<BigRational>
+
+    #region ISerializable
+
+    /// <summary>
+    /// Serializatio
+    /// </summary>
+    public void GetObjectData(SerializationInfo info, StreamingContext context) {
+      if (info is null)
+        throw new ArgumentNullException(nameof(info));
+
+      info.AddValue("Numerator", Numerator.ToString());
+      info.AddValue("Denominator", Numerator.ToString());
+    }
+
+    #endregion ISerializable
   }
 
 }

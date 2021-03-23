@@ -13,6 +13,7 @@
     <PackageIcon>Fi.png</PackageIcon>
     <RepositoryUrl>https://github.com/Dmitry-Bychenko/HigherArithmetics</RepositoryUrl>
     <PackageTags>Number Theory Integer Math</PackageTags>
+    <Version>1.0.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

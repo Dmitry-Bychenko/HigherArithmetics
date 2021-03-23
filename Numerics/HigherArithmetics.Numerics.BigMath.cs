@@ -33,16 +33,10 @@ namespace HigherArithmetics.Numerics {
     public static int SumOfDigits(this BigInteger value) {
       int result = 0;
 
-      if (value < 0)
-        value = -value;
-
-      while (!value.IsZero) {
+      for (; !value.IsZero; value /= 10)
         result += (int)(value % 10);
 
-        value /= 10;
-      }
-
-      return result;
+      return result < 0 ? -result : result;
     }
 
     /// <summary>
