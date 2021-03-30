@@ -99,6 +99,8 @@ namespace HigherArithmetics.Primes {
         return false;
       if (value % 2 == 0)
         return value == 2;
+      if (value % 3 == 0)
+        return value == 3;
 
       var primes = s_Primes;
 

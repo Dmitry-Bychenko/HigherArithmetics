@@ -111,17 +111,17 @@ namespace HigherArithmetics.Numerics {
       value = value.Trim();
 
       if ("NaN".Equals(value, StringComparison.OrdinalIgnoreCase)) {
-        result = BigRational.NaN;
+        result = NaN;
 
         return true;
       }
       else if ("+Inf".Equals(value, StringComparison.OrdinalIgnoreCase)) {
-        result = BigRational.PositiveInfinity;
+        result = PositiveInfinity;
 
         return true;
       }
       else if ("-Inf".Equals(value, StringComparison.OrdinalIgnoreCase)) {
-        result = BigRational.NegativeInfinity;
+        result = NegativeInfinity;
 
         return true;
       }

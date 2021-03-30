@@ -18,28 +18,44 @@ namespace HigherArithmetics.Numerics {
     #region Public
 
     /// <summary>
-    /// Mod
+    /// Normalize value for given modulo
+    /// Ensure, that value in [0 .. mod - 1] range
     /// </summary>
-    public static BigInteger Remainder(this BigInteger value, BigInteger mod) {
-      if (mod <= 0)
-        throw new ArgumentOutOfRangeException(nameof(mod), $"mod == {mod} must be positive.");
+    /// <param name="value">Value</param>
+    /// <param name="modulus">Modulus</param>
+    /// <returns></returns>
+    public static BigInteger Normalize(this BigInteger value, BigInteger modulus) {
+      if (modulus <= 0)
+        throw new ArgumentOutOfRangeException(nameof(modulus));
 
-      if (value >= 0 && value < mod)
+      return (value >= 0 && value < modulus)
+        ? value
+        : ((value % modulus) + value) % value;
+    }
+
+    /// <summary>
+    /// Remiainder (Mod)
+    /// </summary>
+    public static BigInteger Remainder(this BigInteger value, BigInteger modulus) {
+      if (modulus <= 0)
+        throw new ArgumentOutOfRangeException(nameof(modulus), $"mod == {modulus} must be positive.");
+
+      if (value >= 0 && value < modulus)
         return value;
 
-      value %= mod;
+      value %= modulus;
 
       if (value >= 0)
         return value;
       else
-        return value + mod;
+        return value + modulus;
     }
 
     /// <summary>
     /// -value (mod mod)
     /// </summary>
-    public static BigInteger ModNegate(this BigInteger value, BigInteger mod) =>
-      Remainder(-value, mod);
+    public static BigInteger ModNegate(this BigInteger value, BigInteger modulus) =>
+      Remainder(-value, modulus);
 
     /// <summary>
     /// Greatest Common Divisor
@@ -91,25 +107,25 @@ namespace HigherArithmetics.Numerics {
     /// <summary>
     /// Mod Inversion
     /// </summary>
-    public static BigInteger ModInversion(this BigInteger value, BigInteger modulo) {
-      var egcd = Egcd(value, modulo);
+    public static BigInteger ModInversion(this BigInteger value, BigInteger modulus) {
+      var egcd = Egcd(value, modulus);
 
       if (egcd.Gcd != 1)
-        throw new ArgumentException("Invalid modulo", nameof(modulo));
+        throw new ArgumentException("Invalid modulo", nameof(modulus));
 
       BigInteger result = egcd.LeftFactor;
 
       if (result < 0)
-        result += modulo;
+        result += modulus;
 
-      return result % modulo;
+      return result % modulus;
     }
 
     /// <summary>
     /// Mod Division
     /// </summary>
-    public static BigInteger ModDivision(this BigInteger left, BigInteger right, BigInteger modulo) =>
-      (left * ModInversion(right, modulo)) % modulo;
+    public static BigInteger ModDivision(this BigInteger left, BigInteger right, BigInteger modulus) =>
+      (left * ModInversion(right, modulus)) % modulus;
 
     /// <summary>
     /// Chinese Reminder Theorem Solution
@@ -119,24 +135,24 @@ namespace HigherArithmetics.Numerics {
     ///    x = value[n] (mod mods[n])
     /// </summary>
     /// <param name="values">Values</param>
-    /// <param name="mods">Corresponding mods</param>
+    /// <param name="moduluses">Corresponding mods</param>
     /// <returns></returns>
-    /// <example>BigInteger x = Modular.Crt(new BigInteger[] { 1, 2, 6}, new BigInteger[] { 2, 3, 7});</example>
-    public static BigInteger Crt(IEnumerable<BigInteger> values, IEnumerable<BigInteger> mods) {
+    /// <example>BigInteger x = Modulo.Crt(new BigInteger[] { 1, 2, 6}, new BigInteger[] { 2, 3, 7});</example>
+    public static BigInteger Crt(IEnumerable<BigInteger> values, IEnumerable<BigInteger> moduluses) {
       if (values is null)
         throw new ArgumentNullException(nameof(values));
-      else if (mods is null)
-        throw new ArgumentNullException(nameof(mods));
+      else if (moduluses is null)
+        throw new ArgumentNullException(nameof(moduluses));
 
       BigInteger[] r = values.ToArray();
 
       if (r.Length <= 0)
         throw new ArgumentOutOfRangeException(nameof(values), $"{nameof(values)} must not be empty.");
 
-      BigInteger[] a = mods.ToArray();
+      BigInteger[] a = moduluses.ToArray();
 
       if (r.Length != a.Length)
-        throw new ArgumentOutOfRangeException(nameof(mods), $"{nameof(mods)} must be of the same length as {nameof(values)}.");
+        throw new ArgumentOutOfRangeException(nameof(moduluses), $"{nameof(moduluses)} must be of the same length as {nameof(values)}.");
 
       BigInteger M = a.Aggregate(BigInteger.One, (ss, item) => ss * item);
 
@@ -150,6 +166,32 @@ namespace HigherArithmetics.Numerics {
       }
 
       return Remainder(result, M);
+    }
+
+    /// <summary>
+    /// Discrete logarithm
+    /// This fuction can be very time consuming!
+    /// </summary>
+    /// <param name="value">Value</param>
+    /// <param name="logBase">Logarithm base</param>
+    /// <param name="modulus">Modulus</param>
+    /// <returns></returns>
+    public static BigInteger Log(this BigInteger value, BigInteger logBase, BigInteger modulus) {
+      if (logBase <= 1)
+        throw new ArgumentOutOfRangeException(nameof(logBase));
+      if (modulus <= 1)
+        throw new ArgumentOutOfRangeException(nameof(modulus));
+
+      if (value == 1)
+        return 0;
+
+      value = Normalize(value, modulus);
+
+      for (BigInteger x = 1; x < modulus; x += 1)
+        if (BigInteger.ModPow(logBase, x, modulus) == value)
+          return x;
+
+      throw new ArgumentException("Logarithm doesn't exist", nameof(modulus));
     }
 
     #endregion Public

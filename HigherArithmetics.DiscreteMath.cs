@@ -262,6 +262,11 @@ namespace HigherArithmetics {
     #region Number Theory
 
     /// <summary>
+    /// Euler–Mascheroni constant 
+    /// </summary>
+    public const double Gamma = 0.57721566490153286060651209008240243104215933593992;
+
+    /// <summary>
     /// Moebius function
     /// https://en.wikipedia.org/wiki/Moebius_function
     /// </summary>
@@ -294,6 +299,27 @@ namespace HigherArithmetics {
 
       foreach (BigInteger div in Divisors.PrimeDivisorsDistinc(value))
         result = (result / div) * (div - 1);
+
+      return result;
+    }
+
+    /// <summary>
+    /// Divisor function
+    /// </summary>
+    /// <see cref="https://en.wikipedia.org/wiki/Divisor_function"/>
+    public static BigInteger Sigma(this BigInteger value, int index) {
+      if (index < 0)
+        throw new ArgumentOutOfRangeException(nameof(index));
+
+      if (value <= 0)
+        return 0;
+      if (value == 1)
+        return 1;
+
+      BigInteger result = 0;
+
+      foreach (BigInteger d in Divisors.AllDivisors(value))
+        result += BigInteger.Pow(d, index);
 
       return result;
     }
