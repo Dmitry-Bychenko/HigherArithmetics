@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 
 namespace HigherArithmetics.Primes {
 
@@ -62,8 +63,8 @@ namespace HigherArithmetics.Primes {
         if (s_Primes.Count >= next.Count || s_MaxPrime >= maxPrime)
           return;
 
-        s_MaxPrime = maxPrime;
         s_Primes = list;
+        s_MaxPrime = maxPrime;
       }
     }
 

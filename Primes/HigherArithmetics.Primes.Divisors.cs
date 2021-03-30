@@ -147,7 +147,7 @@ namespace HigherArithmetics.Primes {
     /// <summary>
     /// Prime Divisors
     /// </summary>
-    public static IEnumerable<BigInteger> PrimeDivisorsDistinc(this BigInteger value) {
+    public static IEnumerable<BigInteger> PrimeDivisorsDistinct(this BigInteger value) {
       BigInteger prior = 0;
 
       foreach (BigInteger p in PrimeDivisorsExpanded(value)) {
