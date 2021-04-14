@@ -13,7 +13,8 @@
     <PackageIcon>Fi.png</PackageIcon>
     <RepositoryUrl>https://github.com/Dmitry-Bychenko/HigherArithmetics</RepositoryUrl>
     <PackageTags>Number Theory Integer Math</PackageTags>
-    <Version>1.0.0.2</Version>
+    <Version>1.0.0.3</Version>
+    <PackageReleaseNotes>Special Numbers (Fibonacci, Catalan)</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
