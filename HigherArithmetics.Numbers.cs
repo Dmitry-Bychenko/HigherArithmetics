@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HigherArithmetics {
-  
+
   //-------------------------------------------------------------------------------------------------------------------
   //
   /// <summary>
@@ -16,6 +13,18 @@ namespace HigherArithmetics {
   //-------------------------------------------------------------------------------------------------------------------
 
   public static class Numbers {
+    #region Private Data
+
+    private static readonly ConcurrentDictionary<(int n, int k), BigInteger> s_KnownStirlingFirst = new ();
+
+    private static readonly ConcurrentDictionary<(int n, int k), BigInteger> s_KnownStirlingSecond = new ();
+
+    private static readonly ConcurrentDictionary<(int n, int k), BigInteger> s_KnownEulerFirst = new();
+
+    private static readonly ConcurrentDictionary<(int n, int k), BigInteger> s_KnownEulerSecond = new();
+
+    #endregion Private Data
+
     #region Algorithm
 
     private static BigInteger[] Matrix2Power(BigInteger[] matrix, int power) {
@@ -75,6 +84,102 @@ namespace HigherArithmetics {
       }
 
       return result / d;
+    }
+
+    /// <summary>
+    /// Stirling Number of the 1st Kind
+    /// </summary>
+    public static BigInteger StirlingFirst(int n, int k) {
+      if (n < 0 || k < 0)
+        return 0;
+
+      if (n == k)
+        return 1;
+
+      if (k == 0 || n == 0)
+        return 0;
+      if (k > n)
+        return 0;
+
+      if (s_KnownStirlingFirst.TryGetValue((n, k), out BigInteger result))
+        return result;
+
+      result = StirlingFirst(n - 1, k - 1) + (n - 1) * StirlingFirst(n - 1, k);
+
+      s_KnownStirlingFirst.TryAdd((n, k), result);
+
+      return result;
+    }
+
+    /// <summary>
+    /// Stirling Number of the 2nd Kind
+    /// </summary>
+    public static BigInteger StirlingSecond(int n, int k) {
+      if (n < 0 || k < 0)
+        return 0;
+
+      if (n == k || k == 1)
+        return 1;
+
+      if (k == 0 || n == 0)
+        return 0;
+      if (k > n)
+        return 0;
+
+      if (s_KnownStirlingSecond.TryGetValue((n, k), out BigInteger result))
+        return result;
+
+      result = StirlingSecond(n - 1, k - 1) + k * StirlingSecond(n - 1, k);
+
+      s_KnownStirlingFirst.TryAdd((n, k), result);
+
+      return result;
+    }
+
+    /// <summary>
+    /// Euler Number of the 1st Kind
+    /// </summary>
+    public static BigInteger EulerFirst(int n, int m) {
+      if (n < 0 || m < 0)
+        return 0;
+
+      if (m == 0)
+        return 1;
+
+      if (m >= n)
+        return 0;
+
+      if (s_KnownEulerFirst.TryGetValue((n, m), out BigInteger result))
+        return result;
+
+      result = (n - m) * EulerFirst(n - 1, m - 1) + (m + 1) * EulerFirst(n - 1, m);
+
+      s_KnownEulerFirst.TryAdd((n, m), result);
+
+      return result;
+    }
+
+    /// <summary>
+    /// Euler Number of the 2nd Kind
+    /// </summary>
+    public static BigInteger EulerSecond(int n, int m) {
+      if (n < 0 || m < 0)
+        return 0;
+
+      if (m == 0)
+        return 1;
+
+      if (m >= n)
+        return 0;
+
+      if (s_KnownEulerSecond.TryGetValue((n, m), out BigInteger result))
+        return result;
+
+      result = (2 * n - m - 1) * EulerSecond(n - 1, m - 1) + (m + 1) * EulerSecond(n - 1, m);
+
+      s_KnownEulerSecond.TryAdd((n, m), result);
+
+      return result;
     }
 
     #endregion Public
