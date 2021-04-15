@@ -182,6 +182,21 @@ namespace HigherArithmetics {
       return result;
     }
 
+    /// <summary>
+    /// Bell Number
+    /// </summary>
+    public static BigInteger Bell(int n) {
+      if (n < 0)
+        return 0;
+
+      BigInteger result = 0;
+
+      for (int k = n; k >= 0; --k)
+        result += StirlingSecond(n, k);
+
+      return result;
+    }
+
     #endregion Public
   }
 
