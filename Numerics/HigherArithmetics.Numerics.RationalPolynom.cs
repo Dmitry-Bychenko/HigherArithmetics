@@ -204,12 +204,7 @@ namespace HigherArithmetics.Numerics {
     /// Items
     /// </summary>
     public BigRational this[int index] {
-      get {
-        if (index < 0 || index >= m_Items.Count)
-          return 0;
-        else
-          return m_Items[index];
-      }
+      get => (index < 0 || index >= m_Items.Count) ? 0 : m_Items[index];
     }
 
     /// <summary>

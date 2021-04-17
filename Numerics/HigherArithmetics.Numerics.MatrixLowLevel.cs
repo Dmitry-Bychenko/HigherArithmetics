@@ -11,6 +11,19 @@ namespace HigherArithmetics.Numerics {
   //-------------------------------------------------------------------------------------------------------------------
 
   internal static partial class MatrixLowLevel {
+    #region Algorithm
+
+    private static BigRational[] CreateArray(int size) {
+      BigRational[] result = new BigRational[size];
+
+      for (int i = 0; i < result.Length; ++i)
+        result[i] = 0;
+
+      return result;
+    }
+
+    #endregion Algorithm
+
     #region Public
 
     // Unit square matrix
@@ -18,7 +31,7 @@ namespace HigherArithmetics.Numerics {
       BigRational[][] result = new BigRational[size][];
 
       for (int i = size - 1; i >= 0; --i)
-        result[i] = new BigRational[size];
+        result[i] = CreateArray(size);
 
       for (int i = size - 1; i >= 0; --i)
         result[i][i] = 1;
@@ -31,7 +44,7 @@ namespace HigherArithmetics.Numerics {
       BigRational[][] result = new BigRational[size][];
 
       for (int i = size - 1; i >= 0; --i)
-        result[i] = new BigRational[size];
+        result[i] = CreateArray(size);
 
       return result;
     }
