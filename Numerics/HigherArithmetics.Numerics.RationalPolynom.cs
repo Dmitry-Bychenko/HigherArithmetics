@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace HigherArithmetics.Numerics {
 
@@ -272,7 +271,7 @@ namespace HigherArithmetics.Numerics {
       if (m_Items.Count <= 0)
         return "0";
 
-      StringBuilder sb = new ();
+      StringBuilder sb = new();
 
       for (int i = m_Items.Count - 1; i >= 0; --i) {
         BigRational v = m_Items[i];
@@ -319,7 +318,7 @@ namespace HigherArithmetics.Numerics {
         return Zero;
       }
 
-      List<BigRational> quotinent = new ();
+      List<BigRational> quotinent = new();
       List<BigRational> rem = m_Items.ToList();
 
       for (int i = 0; i <= Count - value.Count; ++i) {
@@ -349,7 +348,7 @@ namespace HigherArithmetics.Numerics {
       else if (count >= Count)
         return Zero;
 
-      List<BigRational> list = new (m_Items.Count - count);
+      List<BigRational> list = new(m_Items.Count - count);
 
       BigInteger coef = DiscreteMath.Factorial(count);
 
@@ -358,7 +357,7 @@ namespace HigherArithmetics.Numerics {
 
         coef = coef / (i - count + 1) * (i + 1);
       }
- 
+
       return new RationalPolynom(list);
     }
 
@@ -386,7 +385,7 @@ namespace HigherArithmetics.Numerics {
     /// </summary>
     /// <param name="C">Integrating constant</param>
     public RationalPolynom Integral(BigRational c) {
-      List<BigRational> coefs = new (m_Items.Count + 1) { c };
+      List<BigRational> coefs = new(m_Items.Count + 1) { c };
 
       for (int i = 0; i < m_Items.Count; ++i)
         coefs.Add(m_Items[i] / (i + 1));
@@ -470,7 +469,7 @@ namespace HigherArithmetics.Numerics {
       else if (right is null)
         throw new ArgumentNullException(nameof(right));
 
-      List<BigRational> result = new (Math.Max(left.Count, right.Count));
+      List<BigRational> result = new(Math.Max(left.Count, right.Count));
 
       for (int i = 0; i < result.Count; ++i)
         result.Add(left[i] + right[i]);
@@ -487,7 +486,7 @@ namespace HigherArithmetics.Numerics {
       else if (right is null)
         throw new ArgumentNullException(nameof(right));
 
-      List<BigRational> result = new (Math.Max(left.Count, right.Count));
+      List<BigRational> result = new(Math.Max(left.Count, right.Count));
 
       for (int i = 0; i < result.Count; ++i)
         result.Add(left[i] - right[i]);
@@ -537,7 +536,7 @@ namespace HigherArithmetics.Numerics {
       if (left.Count <= 0 || right.Count <= 0)
         return Zero;
 
-      List<BigRational> list = new (left.Count + right.Count + 1);
+      List<BigRational> list = new(left.Count + right.Count + 1);
 
       for (int power = 0; power <= left.Count + right.Count; ++power) {
         BigRational s = 0;

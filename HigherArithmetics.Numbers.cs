@@ -15,9 +15,9 @@ namespace HigherArithmetics {
   public static class Numbers {
     #region Private Data
 
-    private static readonly ConcurrentDictionary<(int n, int k), BigInteger> s_KnownStirlingFirst = new ();
+    private static readonly ConcurrentDictionary<(int n, int k), BigInteger> s_KnownStirlingFirst = new();
 
-    private static readonly ConcurrentDictionary<(int n, int k), BigInteger> s_KnownStirlingSecond = new ();
+    private static readonly ConcurrentDictionary<(int n, int k), BigInteger> s_KnownStirlingSecond = new();
 
     private static readonly ConcurrentDictionary<(int n, int k), BigInteger> s_KnownEulerFirst = new();
 
