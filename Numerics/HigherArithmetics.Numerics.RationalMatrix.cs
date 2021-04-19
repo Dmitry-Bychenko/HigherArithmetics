@@ -249,9 +249,7 @@ namespace HigherArithmetics.Numerics {
     /// </summary>
     /// <param name="line">Line</param>
     /// <param name="column">Column</param>
-    public BigRational Cell(int line, int column) {
-      return m_Items[line][column];
-    }
+    public BigRational Cell(int line, int column) => m_Items[line][column];
 
     /// <summary>
     /// Cell
@@ -569,17 +567,16 @@ namespace HigherArithmetics.Numerics {
     /// <summary>
     /// Deep copy
     /// </summary>
-    public RationalMatrix Clone() {
-      return new RationalMatrix() {
-        m_Items = m_Items
-                    .Select(line => {
-                      BigRational[] result = new BigRational[line.Length];
-                      Array.Copy(line, 0, result, 0, line.Length);
-                      return result;
-                    })
-                    .ToArray()
-      };
-    }
+    public RationalMatrix Clone() => new () {
+      m_Items = m_Items
+                   .Select(line => {
+                     BigRational[] result = new BigRational[line.Length];
+                     Array.Copy(line, 0, result, 0, line.Length);
+                     return result;
+                   })
+                   .ToArray()
+    };
+
 
     /// <summary>
     /// Deep Copy
@@ -672,10 +669,8 @@ namespace HigherArithmetics.Numerics {
     /// <summary>
     /// To String
     /// </summary>
-    public override string ToString() {
-      return string.Join(Environment.NewLine, m_Items
+    public override string ToString() => string.Join(Environment.NewLine, m_Items
         .Select(line => string.Join("\t", line.Select(item => item.ToString()))));
-    }
 
     #endregion IFormattable
 
