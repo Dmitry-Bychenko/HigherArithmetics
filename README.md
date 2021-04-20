@@ -23,10 +23,10 @@ Console.WriteLine(DiscreteMath.Totient(123));
 // 1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60
 Console.WriteLine(string.Join(", ", Divisors.AllDivisors(60))); 
 
-var ratio = new BigRational(3, 4);
+var ratio = new BigRational(1, 4) + BigRational.Parse("11/37") + BigRational.Parse("1.2(41)");;
 
-// 11 / 4
-Console.WriteLine($"{ratio + 2}");
+// 131041 / 73260
+Console.WriteLine($"Answer is {ratio}");
 
 // 9
 Console.WriteLine(Modulo.ModDivision(511, 137, 19));
