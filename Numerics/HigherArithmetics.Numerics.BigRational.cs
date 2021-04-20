@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Numerics;
 using System.Runtime.Serialization;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace HigherArithmetics.Numerics {
@@ -14,7 +16,7 @@ namespace HigherArithmetics.Numerics {
   //
   //-------------------------------------------------------------------------------------------------------------------
 
-  public struct BigRational : IEquatable<BigRational>, IComparable<BigRational>, ISerializable {
+  public struct BigRational : IEquatable<BigRational>, IComparable<BigRational>, ISerializable, IFormattable {
     #region Create Algorithm
 
     private static bool TryParseDecimal(string source, out BigRational result) {
@@ -464,22 +466,6 @@ namespace HigherArithmetics.Numerics {
         yield return (int)(value / Denominator);
     }
 
-    /// <summary>
-    /// To String
-    /// </summary>
-    public override string ToString() {
-      if (Denominator == 0)
-        if (Numerator == 0)
-          return "NaN";
-        else if (Numerator > 0)
-          return "+Inf";
-        else
-          return "-Inf";
-      else if (Denominator == 1)
-        return Numerator.ToString();
-
-      return $"{Numerator} / {Denominator}";
-    }
 
     #endregion Public
 
@@ -618,7 +604,7 @@ namespace HigherArithmetics.Numerics {
     #region ISerializable
 
     /// <summary>
-    /// Serializatio
+    /// Serialization
     /// </summary>
     public void GetObjectData(SerializationInfo info, StreamingContext context) {
       if (info is null)
@@ -629,6 +615,142 @@ namespace HigherArithmetics.Numerics {
     }
 
     #endregion ISerializable
+
+    #region IFormattable
+
+    /// <summary>
+    /// To Natural representation (e.g. "1 / 6")
+    /// </summary>
+    public string ToStringNatural() {
+      if (Denominator == 0)
+        if (Numerator == 0)
+          return "NaN";
+        else if (Numerator > 0)
+          return "+Inf";
+        else
+          return "-Inf";
+      else if (Denominator == 1)
+        return Numerator.ToString();
+
+      return $"{Numerator} / {Denominator}";
+    }
+
+    /// <summary>
+    /// To Decimal representation (e.g. "0.1(6)")
+    /// </summary>
+    public string ToStringDecimal(IFormatProvider formatProvider = null) {
+      if (Denominator == 0)
+        if (Numerator == 0)
+          return "NaN";
+        else if (Numerator > 0)
+          return "+Inf";
+        else
+          return "-Inf";
+      else if (Denominator == 1)
+        return Numerator.ToString();
+
+      formatProvider ??= CultureInfo.CurrentCulture;
+
+      var format = formatProvider.GetFormat(typeof(NumberFormatInfo));
+
+      var numerator = Numerator;
+
+      StringBuilder sb = new ();
+
+      if (numerator < 0) {
+        sb.Append('-');
+
+        numerator = BigInteger.Abs(numerator);
+      }
+
+      sb.Append(numerator / Denominator);
+
+      if (format is NumberFormatInfo nfi)
+        sb.Append(nfi.NumberDecimalSeparator);
+      else
+        sb.Append('.');
+
+      numerator %= Denominator;
+
+      List<int> digits = new ();
+      Dictionary<BigInteger, int> remainders = new ();
+
+      for (int index = 0; ; ++index) {
+        numerator *= 10;
+
+        BigInteger rem = numerator % Denominator;
+
+        int digit = (int)(numerator / Denominator);
+        numerator -= digit * Denominator;
+
+        if (rem == 0) {
+          digits.Add(digit);
+
+          sb.Append(string.Concat(digits));
+
+          break;
+        }
+
+        if (remainders.TryGetValue(rem, out int idx)) {
+          if (digit != digits[idx]) {
+            idx += 1;
+            digits.Add(digit);
+          }
+
+          for (int i = 0; i < idx; ++i)
+            sb.Append(digits[i]);
+
+          sb.Append('(');
+
+          for (int i = idx; i < digits.Count; ++i)
+            sb.Append(digits[i]);
+
+          sb.Append(')');
+
+          break;
+        }
+
+        digits.Add(digit);
+
+        remainders.Add(rem, index);
+      }
+
+      return sb.ToString();
+
+    }
+
+    /// <summary>
+    /// To String
+    /// </summary>
+    public override string ToString() {
+      if (Denominator == 0)
+        if (Numerator == 0)
+          return "NaN";
+        else if (Numerator > 0)
+          return "+Inf";
+        else
+          return "-Inf";
+      else if (Denominator == 1)
+        return Numerator.ToString();
+
+      return $"{Numerator} / {Denominator}";
+    }
+
+    /// <summary>
+    /// To String
+    /// </summary>
+    public string ToString(string format, IFormatProvider formatProvider) {
+      if (string.IsNullOrEmpty(format) || format == "g" || format == "G")
+        return ToStringNatural();
+      if (format == "n" || format == "N")
+        return ToStringNatural();
+      if (format == "d" || format == "D")
+        return ToStringDecimal(formatProvider);
+
+      throw new FormatException("Invalid format");
+    }
+
+    #endregion IFormattable
   }
 
 }
