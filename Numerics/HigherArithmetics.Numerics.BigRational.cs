@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 
 namespace HigherArithmetics.Numerics {
 
@@ -14,6 +15,117 @@ namespace HigherArithmetics.Numerics {
   //-------------------------------------------------------------------------------------------------------------------
 
   public struct BigRational : IEquatable<BigRational>, IComparable<BigRational>, ISerializable {
+    #region Create Algorithm
+
+    private static bool TryParseDecimal(string source, out BigRational result) {
+      result = BigRational.NaN;
+
+      if (string.IsNullOrWhiteSpace(source))
+        return false;
+
+      const string pattern =
+        @"^\s*(?<sign>[+-])?\s*(?<int>[0-9]+)?(\.(?<frac>[0-9]+)?(?<period>\([0-9]+\))?)?([eE](?<exp>[+-]?[0-9]+)?)?\s*$";
+
+      Match match = Regex.Match(source, pattern);
+
+      if (!match.Success)
+        return false;
+
+      string signPart = match.Groups["sign"].Value;
+      string intPart = match.Groups["int"].Value;
+      string fracPart = match.Groups["frac"].Value;
+      string periodPart = match.Groups["period"].Value.Trim('(', ')');
+      string expPart = match.Groups["exp"].Value;
+
+      if (string.IsNullOrEmpty(intPart) &&
+          string.IsNullOrEmpty(fracPart) &&
+          string.IsNullOrEmpty(periodPart))
+        return false;
+
+      result = 0;
+
+      if (!string.IsNullOrEmpty(intPart))
+        result += BigInteger.Parse(intPart);
+
+      if (!string.IsNullOrEmpty(fracPart))
+        result += new BigRational(BigInteger.Parse(fracPart), BigInteger.Pow(10, fracPart.Length));
+
+      if (!string.IsNullOrEmpty(periodPart))
+        result += new BigRational(BigInteger.Parse(periodPart), BigInteger.Pow(10, periodPart.Length) - 1) /
+                  BigInteger.Pow(10, fracPart.Length);
+
+      if (!string.IsNullOrEmpty(expPart)) {
+        if (!int.TryParse(expPart, out int exp) && exp > 1_000_000_000) {
+          result = BigRational.NaN;
+
+          return false;
+        }
+
+        BigInteger factor = BigInteger.Pow(10, Math.Abs(exp));
+
+        if (exp < 0)
+          result /= factor;
+        else
+          result *= factor;
+      }
+
+      if (signPart == "-")
+        result = -result;
+
+      return true;
+    }
+
+    private static bool TryParseNatural(string value, out BigRational result) {
+      result = NaN;
+
+      if (string.IsNullOrWhiteSpace(value))
+        return false;
+
+      value = value.Trim();
+
+      if ("NaN".Equals(value, StringComparison.OrdinalIgnoreCase)) {
+        result = NaN;
+
+        return true;
+      }
+      else if ("+Inf".Equals(value, StringComparison.OrdinalIgnoreCase)) {
+        result = PositiveInfinity;
+
+        return true;
+      }
+      else if ("-Inf".Equals(value, StringComparison.OrdinalIgnoreCase)) {
+        result = NegativeInfinity;
+
+        return true;
+      }
+
+      string[] parts = value.Split(new char[] { '/', '\\', ':' });
+
+      if (parts.Length > 2)
+        return false;
+
+      if (parts.Length == 1) {
+        if (BigInteger.TryParse(value, out BigInteger v)) {
+          result = new BigRational(v);
+
+          return true;
+        }
+        else
+          return false;
+      }
+
+      if (BigInteger.TryParse(parts[0], out BigInteger a) &&
+          BigInteger.TryParse(parts[1], out BigInteger b)) {
+        result = new BigRational(a, b);
+
+        return true;
+      }
+
+      return false;
+    }
+
+    #endregion Create Algorithm
+
     #region Create
 
     // Deserialization
@@ -100,53 +212,15 @@ namespace HigherArithmetics.Numerics {
     public BigRational(BigInteger value) : this(value, 1) { }
 
     /// <summary>
-    /// Try Parse
+    /// Try Parse (either natural, like "23 / 97" or decimal like "-1.45(913)e-6")
     /// </summary>
     public static bool TryParse(string value, out BigRational result) {
+      if (TryParseNatural(value, out result))
+        return true;
+      if (TryParseDecimal(value, out result))
+        return true;
+
       result = NaN;
-
-      if (string.IsNullOrWhiteSpace(value))
-        return false;
-
-      value = value.Trim();
-
-      if ("NaN".Equals(value, StringComparison.OrdinalIgnoreCase)) {
-        result = NaN;
-
-        return true;
-      }
-      else if ("+Inf".Equals(value, StringComparison.OrdinalIgnoreCase)) {
-        result = PositiveInfinity;
-
-        return true;
-      }
-      else if ("-Inf".Equals(value, StringComparison.OrdinalIgnoreCase)) {
-        result = NegativeInfinity;
-
-        return true;
-      }
-
-      string[] parts = value.Split(new char[] { '/', '\\', ':' });
-
-      if (parts.Length > 2)
-        return false;
-
-      if (parts.Length == 1) {
-        if (BigInteger.TryParse(value, out BigInteger v)) {
-          result = new BigRational(v);
-
-          return true;
-        }
-        else
-          return false;
-      }
-
-      if (BigInteger.TryParse(parts[0], out BigInteger a) &&
-          BigInteger.TryParse(parts[1], out BigInteger b)) {
-        result = new BigRational(a, b);
-
-        return true;
-      }
 
       return false;
     }
