@@ -458,24 +458,24 @@ namespace HigherArithmetics {
 
       b = BigInteger.Abs(b);
 
-      foreach (var divisor in b.PrimeDivisors()) {
-        BigInteger rem = (a % divisor.prime);
+      foreach (var (prime, power) in b.PrimeDivisors()) {
+        BigInteger rem = (a % prime);
 
         if (rem == 0)
           return 0;
 
-        if (divisor.power % 2 == 0)
+        if (power % 2 == 0)
           continue;
 
-        if (divisor.prime == 2) {
+        if (prime == 2) {
           if (((a * a - 1) / 8) % 2 != 0)
             result = -result;
         }
         else {
-          BigInteger mod = BigInteger.ModPow(a, (divisor.prime - 1) / 2, divisor.prime);
+          BigInteger mod = BigInteger.ModPow(a, (prime - 1) / 2, prime);
 
           if (mod < 0)
-            mod = (mod + divisor.prime) % divisor.prime;
+            mod = (mod + prime) % prime;
 
           if (mod != 1)
             result = -result;
