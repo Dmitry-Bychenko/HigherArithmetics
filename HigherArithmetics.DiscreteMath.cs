@@ -444,7 +444,7 @@ namespace HigherArithmetics {
     /// Kroneker Symbol (a, b)
     /// </summary>
     /// <see cref="https://en.wikipedia.org/wiki/Kronecker_symbol"/>
-    public static int Kroneker(BigInteger a, BigInteger b) {
+    public static int Kronecker(BigInteger a, BigInteger b) {
       int result = 1;
 
       if (b == -1)
