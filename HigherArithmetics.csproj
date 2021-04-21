@@ -14,8 +14,9 @@
     <RepositoryUrl>https://github.com/Dmitry-Bychenko/HigherArithmetics</RepositoryUrl>
     <PackageTags>Number Theory Integer Math</PackageTags>
     <Version>1.0.0.5</Version>
-    <PackageReleaseNotes>Rational Matrices
-Rational Polynoms</PackageReleaseNotes>
+    <PackageReleaseNotes>BigRational Decimal parsing and representation
+Ranks (for proper permutation)
+Kronecker Symbol</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
