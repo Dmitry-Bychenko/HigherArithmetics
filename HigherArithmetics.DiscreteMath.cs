@@ -440,6 +440,51 @@ namespace HigherArithmetics {
       return true;
     }
 
+    /// <summary>
+    /// Kroneker Symbol (a, b)
+    /// </summary>
+    /// <see cref="https://en.wikipedia.org/wiki/Kronecker_symbol"/>
+    public static int Kroneker(BigInteger a, BigInteger b) {
+      int result = 1;
+
+      if (b == -1)
+        return a < 0 ? -1 : 1;
+      if (b == 0)
+        return a == 1 || a == -1 ? 1 : 0;
+      if (b == 1)
+        return 1;
+
+      int sign = b < 0 ? -1 : 1;
+
+      b = BigInteger.Abs(b);
+
+      foreach (var divisor in b.PrimeDivisors()) {
+        BigInteger rem = (a % divisor.prime);
+
+        if (rem == 0)
+          return 0;
+
+        if (divisor.power % 2 == 0)
+          continue;
+
+        if (divisor.prime == 2) {
+          if (((a * a - 1) / 8) % 2 != 0)
+            result = -result;
+        }
+        else {
+          BigInteger mod = BigInteger.ModPow(a, (divisor.prime - 1) / 2, divisor.prime);
+
+          if (mod < 0)
+            mod = (mod + divisor.prime) % divisor.prime;
+
+          if (mod != 1)
+            result = -result;
+        }
+      }
+
+      return result * sign;
+    }
+
     #endregion Number Theory
 
     #endregion Public
