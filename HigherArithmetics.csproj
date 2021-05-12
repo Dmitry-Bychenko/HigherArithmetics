@@ -13,10 +13,8 @@
     <PackageIcon>Fi.png</PackageIcon>
     <RepositoryUrl>https://github.com/Dmitry-Bychenko/HigherArithmetics</RepositoryUrl>
     <PackageTags>Number Theory Integer Math</PackageTags>
-    <Version>1.0.0.5</Version>
-    <PackageReleaseNotes>BigRational Decimal parsing and representation
-Ranks (for proper permutation)
-Kronecker Symbol</PackageReleaseNotes>
+    <Version>1.0.0.6</Version>
+    <PackageReleaseNotes>Combinatorics (Linq and formulae)</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
