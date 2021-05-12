@@ -22,7 +22,7 @@ namespace HigherArithmetics.Linq {
     /// <param name="items">Initial multiset</param>
     /// <param name="comparer">Comparer to use</param>
     /// <returns>[Multi]subsets</returns>
-    public static IEnumerable<T[]> Subsets<T>(IEnumerable<T> items, IEqualityComparer<T> comparer) {
+    public static IEnumerable<T[]> Subsets<T>(this IEnumerable<T> items, IEqualityComparer<T> comparer) {
       if (items is null)
         throw new ArgumentNullException(nameof(items));
 
@@ -78,7 +78,7 @@ namespace HigherArithmetics.Linq {
     /// </summary>
     /// <param name="items">Initial multiset</param>
     /// <returns>[Multi]subsets</returns>
-    public static IEnumerable<T[]> Subsets<T>(IEnumerable<T> items) => Subsets(items, EqualityComparer<T>.Default);
+    public static IEnumerable<T[]> Subsets<T>(this IEnumerable<T> items) => Subsets(items, EqualityComparer<T>.Default);
 
     #endregion Public
   }

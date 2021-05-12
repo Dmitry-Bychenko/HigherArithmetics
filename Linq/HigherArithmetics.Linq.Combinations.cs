@@ -107,7 +107,7 @@ namespace HigherArithmetics.Linq {
     /// <param name="source">Multiset to get combinations from</param>
     /// <param name="size">Size of combinations</param>
     /// <returns>Unordered combinations without repetions</returns>
-    public static IEnumerable<T[]> Combinations<T>(IEnumerable<T> source, int size) =>
+    public static IEnumerable<T[]> Combinations<T>(this IEnumerable<T> source, int size) =>
       Combinations(source, size, EqualityComparer<T>.Default);
 
     #endregion Public 

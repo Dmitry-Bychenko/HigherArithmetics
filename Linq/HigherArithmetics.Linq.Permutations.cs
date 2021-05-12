@@ -89,7 +89,7 @@ namespace HigherArithmetics.Linq {
     /// </summary>
     /// <param name="items">initial permutation to use</param>
     /// <param name="comparer">comparer to compare items</param>
-    public static IEnumerable<T[]> Permutations<T>(IEnumerable<T> items, IEqualityComparer<T> comparer) {
+    public static IEnumerable<T[]> Permutations<T>(this IEnumerable<T> items, IEqualityComparer<T> comparer) {
       if (items is null)
         throw new ArgumentNullException(nameof(items));
 
@@ -161,7 +161,7 @@ namespace HigherArithmetics.Linq {
     /// Enumerate permutations starting from items
     /// </summary>
     /// <param name="items">initial permutation to use</param>
-    public static IEnumerable<T[]> Permutations<T>(IEnumerable<T> items) =>
+    public static IEnumerable<T[]> Permutations<T>(this IEnumerable<T> items) =>
       Permutations(items, EqualityComparer<T>.Default);
 
     #endregion Public
