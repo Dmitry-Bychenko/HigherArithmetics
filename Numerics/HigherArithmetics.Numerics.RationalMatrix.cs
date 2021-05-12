@@ -567,7 +567,7 @@ namespace HigherArithmetics.Numerics {
     /// <summary>
     /// Deep copy
     /// </summary>
-    public RationalMatrix Clone() => new () {
+    public RationalMatrix Clone() => new() {
       m_Items = m_Items
                    .Select(line => {
                      BigRational[] result = new BigRational[line.Length];

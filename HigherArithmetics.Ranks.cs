@@ -26,7 +26,7 @@ namespace HigherArithmetics {
 
       int n = value.Length;
 
-      HashSet<int> usedDigits = new ();
+      HashSet<int> usedDigits = new();
 
       BigInteger rank = 0;
 
@@ -78,7 +78,7 @@ namespace HigherArithmetics {
       }
 
       int[] permutation = new int[size];
-      List<int> usedDigits = new (size);
+      List<int> usedDigits = new(size);
 
       for (int i = 0; i < size; ++i)
         usedDigits.Add(0);

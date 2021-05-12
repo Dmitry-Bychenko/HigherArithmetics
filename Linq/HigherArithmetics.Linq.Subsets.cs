@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace HigherArithmetics.Linq {
-  
+
   //-------------------------------------------------------------------------------------------------------------------
   //
   /// <summary>
@@ -28,7 +28,7 @@ namespace HigherArithmetics.Linq {
 
       comparer ??= EqualityComparer<T>.Default;
 
-      Dictionary<T, int> dict = new (comparer);
+      Dictionary<T, int> dict = new(comparer);
 
       foreach (T item in items)
         if (dict.TryGetValue(item, out int count))
@@ -46,7 +46,7 @@ namespace HigherArithmetics.Linq {
 
       int[] current = new int[alphabet.Length];
 
-      List<T> window = new ();
+      List<T> window = new();
 
       do {
         window.Clear();

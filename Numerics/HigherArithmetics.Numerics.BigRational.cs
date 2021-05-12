@@ -655,7 +655,7 @@ namespace HigherArithmetics.Numerics {
 
       var numerator = Numerator;
 
-      StringBuilder sb = new ();
+      StringBuilder sb = new();
 
       if (numerator < 0) {
         sb.Append('-');
@@ -672,8 +672,8 @@ namespace HigherArithmetics.Numerics {
 
       numerator %= Denominator;
 
-      List<int> digits = new ();
-      Dictionary<BigInteger, int> remainders = new ();
+      List<int> digits = new();
+      Dictionary<BigInteger, int> remainders = new();
 
       for (int index = 0; ; ++index) {
         numerator *= 10;
