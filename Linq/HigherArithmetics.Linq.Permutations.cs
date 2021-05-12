@@ -98,7 +98,7 @@ namespace HigherArithmetics.Linq {
       T[] data = items.ToArray();
       T[] initial = data.ToArray();
 
-      Dictionary<T, int> dict = new Dictionary<T, int>(comparer);
+      Dictionary<T, int> dict = new (comparer);
 
       foreach (T item in data)
         if (!dict.ContainsKey(item))
