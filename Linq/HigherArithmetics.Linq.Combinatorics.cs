@@ -18,7 +18,7 @@ namespace HigherArithmetics.Linq {
 
     // Combinations with replacement, order matters
     // {A, B, C}, 4 -> {A, A, A, A}, {A, A, A, B}, {A, A, A, C}, {A, A, B, A}, ... , {C, C, C, C}
-    private static IEnumerable<T[]> OrderedWithReplacement<T>(IEnumerable<T> source, 
+    private static IEnumerable<T[]> OrderedWithReplacement<T>(IEnumerable<T> source,
                                                               int size,
                                                               IEqualityComparer<T> comparer) {
       if (source is null)
@@ -59,7 +59,7 @@ namespace HigherArithmetics.Linq {
 
     // Combinations with replacement, order doesn't matters
     // {A, B, C}, 4 -> {A, A, A, A}, {A, A, A, B}, {A, A, A, C}, {A, A, B, B}, {A, A, B, C},... , {C, C, C, C}
-    private static IEnumerable<T[]> UnOrderedWithReplacement<T>(IEnumerable<T> source, 
+    private static IEnumerable<T[]> UnOrderedWithReplacement<T>(IEnumerable<T> source,
                                                                 int size,
                                                                 IEqualityComparer<T> comparer) {
       if (source is null)
@@ -139,7 +139,7 @@ namespace HigherArithmetics.Linq {
         window[i] = items[i];
 
       do {
-        foreach (var outcome in LightPermutations(window, dict)) 
+        foreach (var outcome in LightPermutations(window, dict))
           yield return outcome;
 
         int index = -1;
@@ -170,27 +170,86 @@ namespace HigherArithmetics.Linq {
 
         int rest = 0;
 
-        for (int i = 0; i <= index; ++i) 
-          for (int j = rest; j < items.Length; ++j) 
+        for (int i = 0; i <= index; ++i)
+          for (int j = rest; j < items.Length; ++j)
             if (comparer.Equals(window[i], items[j])) {
               rest = j;
 
               break;
             }
 
-        for (int i = index + 1; i < window.Length; ++i) 
+        for (int i = index + 1; i < window.Length; ++i)
           window[i] = items[++rest];
       }
       while (true);
+    }
+
+    // [Multi]subset from multiset, order matters
+    // {1, 1, 2} => {}, {2}, {1}, {1, 2}, {1, 1}, {2, 1}, {1, 1, 2}, {1, 2, 1}, {2, 1, 1}
+    private static IEnumerable<T[]> OrderedSubsets<T>(IEnumerable<T> items, IEqualityComparer<T> comparer) {
+      if (items is null)
+        throw new ArgumentNullException(nameof(items));
+
+      comparer ??= EqualityComparer<T>.Default;
+
+      Dictionary<T, int> dict = new(comparer);
+
+      foreach (T item in items)
+        if (dict.TryGetValue(item, out int count))
+          dict[item] = count + 1;
+        else
+          dict.Add(item, 1);
+
+      if (dict.Count <= 0) {
+        yield return Array.Empty<T>();
+
+        yield break;
+      }
+
+      var alphabet = dict.ToArray();
+
+      Dictionary<T, int> permDict = new();
+
+      for (int i = 0; i < alphabet.Length; ++i)
+        permDict.Add(alphabet[i].Key, i);
+
+      int[] current = new int[alphabet.Length];
+
+      List<T> window = new();
+
+      do {
+        window.Clear();
+
+        for (int index = 0; index < current.Length; ++index) {
+          int count = current[index];
+
+          for (int i = 0; i < count; ++i)
+            window.Add(alphabet[index].Key);
+        }
+
+        foreach (T[] item in LightPermutations(window.ToArray(), permDict))
+          yield return item;
+
+        for (int i = current.Length - 1; i >= 0; --i) {
+          if (current[i] == alphabet[i].Value)
+            current[i] = 0;
+          else {
+            current[i] += 1;
+
+            break;
+          }
+        }
+      }
+      while (current.Any(item => item != 0));
     }
 
     // Permutations
     private static IEnumerable<T[]> LightPermutations<T>(T[] initial, IDictionary<T, int> dictionary) {
       if (initial is null)
         throw new ArgumentNullException(nameof(initial));
-      
+
       T[] data = initial.ToArray();
-      
+
       foreach (T item in data)
         if (!dictionary.ContainsKey(item))
           dictionary.Add(item, dictionary.Count);
@@ -294,6 +353,41 @@ namespace HigherArithmetics.Linq {
                                                         bool withReplacement,
                                                         bool orderMatters) =>
       Combinations(source, size, withReplacement, orderMatters, EqualityComparer<T>.Default);
+
+    /// <summary>
+    /// [Multi]subset from multiset, e.g.
+    /// [1, 1, 2] => [], [2], [1], [1, 2], [1, 1], [1, 1, 2]
+    /// Or (order matters)
+    /// [1, 1, 2] => [], [2], [1], [1, 2], [1, 1], [2, 1], [1, 1, 2], [1, 2, 1], [2, 1, 1]
+    /// </summary>
+    /// <param name="items">Initial multiset</param>
+    /// <param name="orderMatters">If order matters or not</param>
+    /// <param name="comparer">Comparer to use</param>
+    /// <returns>[Multi]subsets</returns>
+    public static IEnumerable<T[]> Subsets<T>(this IEnumerable<T> items,
+                                                   bool orderMatters,
+                                                   IEqualityComparer<T> comparer) {
+      if (items is null)
+        throw new ArgumentNullException(nameof(items));
+
+      if (orderMatters)
+        return OrderedSubsets(items, comparer);
+      else
+        return Subsets(items, comparer);
+    }
+
+    /// <summary>
+    /// [Multi]subset from multiset, e.g.
+    /// [1, 1, 2] => [], [2], [1], [1, 2], [1, 1], [1, 1, 2]
+    /// Or (order matters)
+    /// [1, 1, 2] => [], [2], [1], [1, 2], [1, 1], [2, 1], [1, 1, 2], [1, 2, 1], [2, 1, 1]
+    /// </summary>
+    /// <param name="items">Initial multiset</param>
+    /// <param name="orderMatters">If order matters or not</param>
+    /// <returns>[Multi]subsets</returns>
+    public static IEnumerable<T[]> Subsets<T>(this IEnumerable<T> items,
+                                                   bool orderMatters) =>
+      Subsets(items, orderMatters, EqualityComparer<T>.Default);
 
     #endregion Public
   }
