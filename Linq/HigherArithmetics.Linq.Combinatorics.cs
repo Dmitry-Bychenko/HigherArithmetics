@@ -38,12 +38,9 @@ namespace HigherArithmetics.Linq {
       int[] indexes = new int[size];
 
       do {
-        T[] window = new T[indexes.Length];
-
-        for (int i = alphabet.Length - 1; i >= 0; --i)
-          window[i] = alphabet[i];
-
-        yield return window;
+        yield return indexes
+          .Select(i => alphabet[i])
+          .ToArray();
 
         for (int i = indexes.Length - 1; i >= 0; --i)
           if (indexes[i] >= alphabet.Length - 1)
@@ -79,13 +76,10 @@ namespace HigherArithmetics.Linq {
       int[] indexes = new int[size];
 
       do {
-        T[] window = new T[indexes.Length];
-
-        for (int i = alphabet.Length - 1; i >= 0; --i)
-          window[i] = alphabet[i];
-
-        yield return window;
-
+        yield return indexes
+          .Select(i => alphabet[i])
+          .ToArray();
+               
         for (int i = indexes.Length - 1; i >= 0; --i)
           if (indexes[i] >= alphabet.Length - 1)
             indexes[i] = 0;
