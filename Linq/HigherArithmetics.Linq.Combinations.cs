@@ -39,7 +39,7 @@ namespace HigherArithmetics.Linq {
         .ToArray();
 
       if (size > items.Length)
-        throw new ArgumentOutOfRangeException(nameof(size));
+        yield break;
 
       if (items.Length == size) {
         yield return items;
