@@ -243,6 +243,42 @@ namespace HigherArithmetics.Linq {
       while (current.Any(item => item != 0));
     }
 
+    private static IEnumerable<T[]> OrderedSubsetsWithReplacement<T>(IEnumerable<T> items, IEqualityComparer<T> comparer) {
+      if (items is null)
+        throw new ArgumentNullException(nameof(items));
+
+      T[] unique = items
+        .Distinct(comparer)
+        .ToArray();
+
+      yield return Array.Empty<T>();
+
+      if (unique.Length <= 0) 
+        yield break;
+
+      for (int size = 1; ; ++size)
+        foreach (T[] result in OrderedWithReplacement(unique, size, comparer))
+          yield return result;
+    }
+
+    private static IEnumerable<T[]> UnOrderedSubsetsWithReplacement<T>(IEnumerable<T> items, IEqualityComparer<T> comparer) {
+      if (items is null)
+        throw new ArgumentNullException(nameof(items));
+
+      T[] unique = items
+        .Distinct(comparer)
+        .ToArray();
+
+      yield return Array.Empty<T>();
+
+      if (unique.Length <= 0)
+        yield break;
+
+      for (int size = 1; ; ++size)
+        foreach (T[] result in UnOrderedWithReplacement(unique, size, comparer))
+          yield return result;
+    }
+
     // Permutations
     private static IEnumerable<T[]> LightPermutations<T>(T[] initial, IDictionary<T, int> dictionary) {
       if (initial is null)
@@ -365,12 +401,21 @@ namespace HigherArithmetics.Linq {
     /// <param name="comparer">Comparer to use</param>
     /// <returns>[Multi]subsets</returns>
     public static IEnumerable<T[]> Subsets<T>(this IEnumerable<T> items,
+                                                   bool withReplacement,
                                                    bool orderMatters,
                                                    IEqualityComparer<T> comparer) {
       if (items is null)
         throw new ArgumentNullException(nameof(items));
 
-      if (orderMatters)
+      comparer ??= EqualityComparer<T>.Default;
+
+      if (withReplacement) {
+        if (orderMatters)
+          return OrderedSubsetsWithReplacement(items, comparer);
+        else
+          return UnOrderedSubsetsWithReplacement(items, comparer);
+      }
+      else if (orderMatters)
         return OrderedSubsets(items, comparer);
       else
         return Subsets(items, comparer);
@@ -386,8 +431,9 @@ namespace HigherArithmetics.Linq {
     /// <param name="orderMatters">If order matters or not</param>
     /// <returns>[Multi]subsets</returns>
     public static IEnumerable<T[]> Subsets<T>(this IEnumerable<T> items,
+                                                   bool withReplacement,
                                                    bool orderMatters) =>
-      Subsets(items, orderMatters, EqualityComparer<T>.Default);
+      Subsets(items, withReplacement, orderMatters, EqualityComparer<T>.Default);
 
     #endregion Public
   }
