@@ -13,8 +13,8 @@
     <PackageIcon>Fi.png</PackageIcon>
     <RepositoryUrl>https://github.com/Dmitry-Bychenko/HigherArithmetics</RepositoryUrl>
     <PackageTags>Number Theory Integer Math</PackageTags>
-    <Version>1.0.0.6</Version>
-    <PackageReleaseNotes>Combinatorics (Linq and formulae)</PackageReleaseNotes>
+    <Version>1.0.0.7</Version>
+    <PackageReleaseNotes>Continued Fractions</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

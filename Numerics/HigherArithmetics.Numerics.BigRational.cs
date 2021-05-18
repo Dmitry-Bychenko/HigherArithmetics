@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Numerics;
 using System.Runtime.Serialization;
 using System.Text;
@@ -225,6 +226,23 @@ namespace HigherArithmetics.Numerics {
       result = NaN;
 
       return false;
+    }
+
+    /// <summary>
+    /// From Continued Fraction
+    /// </summary>
+    /// <param name="terms"></param>
+    /// <returns></returns>
+    public static BigRational FromContinuedFraction(IEnumerable<BigInteger> terms) {
+      if (terms is null)
+        throw new ArgumentNullException(nameof(terms));
+
+      BigRational result = BigRational.PositiveInfinity;
+
+      foreach (BigInteger term in terms.Reverse())
+        result = (term + 1 / result);
+
+      return result;
     }
 
     /// <summary>
@@ -464,6 +482,22 @@ namespace HigherArithmetics.Numerics {
            value != 0;
            value = (value % Denominator) * 10)
         yield return (int)(value / Denominator);
+    }
+
+    /// <summary>
+    /// To Continued Fraction 
+    /// </summary>
+    public IEnumerable<BigInteger> ToContinuedFraction() {
+      BigInteger num = Numerator;
+      BigInteger den = Denominator;
+
+      while (den != 0) {
+        yield return BigInteger.DivRem(num, den, out num);
+
+        BigInteger h = num;
+        num = den;
+        den = h;
+      }
     }
 
     #endregion Public
