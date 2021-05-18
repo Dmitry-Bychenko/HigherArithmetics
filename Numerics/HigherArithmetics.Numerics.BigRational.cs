@@ -466,7 +466,6 @@ namespace HigherArithmetics.Numerics {
         yield return (int)(value / Denominator);
     }
 
-
     #endregion Public
 
     #region Operators
