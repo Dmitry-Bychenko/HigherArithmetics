@@ -8,6 +8,7 @@ This **.Net** routine uses `System.Numerics.BigInteger`
 
 ```c#
 using HigherArithmetics;
+using HigherArithmetics.Linq;
 using HigherArithmetics.Numerics;
 using HigherArithmetics.Primes;
 
@@ -31,4 +32,6 @@ Console.WriteLine($"Answer is {ratio}");
 // 9
 Console.WriteLine(Modulo.ModDivision(511, 137, 19));
 
+// AAA, AAB, AAC, ABB, ABC, BBC
+Console.WriteLine(string.Join(", ", "ABCABA".Combinations(3).Select(item => string.Concat(item))));
 ```
