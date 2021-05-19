@@ -273,7 +273,7 @@ namespace HigherArithmetics.Numerics {
       if (radix < 2 || radix > 36)
         throw new ArgumentOutOfRangeException(nameof(radix));
 
-      int DigitFromChar(char c) {
+      static int DigitFromChar(char c) {
         if (c >= '0' && c <= '9')
           return c - '0';
         if (c >= 'a' && c <= 'z')
@@ -603,7 +603,7 @@ namespace HigherArithmetics.Numerics {
         foreach (char c in ToString())
           yield return c;
       
-      char DigitToChar(int v) => (char)(v < 10 ? '0' + v : 'a' + v - 10);
+      static char DigitToChar(int v) => (char)(v < 10 ? '0' + v : 'a' + v - 10);
 
       BigRational value = this;
 
@@ -618,7 +618,7 @@ namespace HigherArithmetics.Numerics {
       if (intPart == 0)
         yield return '0';
       else {
-        Stack<char> digits = new Stack<char>();
+        Stack<char> digits = new ();
 
         for (; intPart > 0; intPart /= radix)
           digits.Push(DigitToChar((int)(intPart % radix)));
@@ -655,14 +655,51 @@ namespace HigherArithmetics.Numerics {
     public static implicit operator BigRational(BigInteger value) => new(value);
 
     /// <summary>
+    /// To Integer
+    /// </summary>
+    public static explicit operator BigInteger(BigRational value) => value.IsNaN || value.IsInfinity 
+      ? throw new OverflowException() 
+      : value.Numerator / value.Denominator;
+
+    /// <summary>
     /// From Integer
     /// </summary>
     public static implicit operator BigRational(int value) => new(value, 1);
 
     /// <summary>
+    /// To Integer
+    /// </summary>
+    public static explicit operator int(BigRational value) {
+      if (value.IsNaN || value.IsInfinity)
+        throw new OverflowException();
+
+      BigInteger result = value.Numerator / value.Denominator;
+
+      if (result < int.MinValue || result > int.MaxValue)
+        throw new OverflowException();
+
+      return (int)result;
+    } 
+
+    /// <summary>
     /// From Integer
     /// </summary>
     public static implicit operator BigRational(long value) => new(value, 1);
+
+    /// <summary>
+    /// To Integer
+    /// </summary>
+    public static explicit operator long(BigRational value) {
+      if (value.IsNaN || value.IsInfinity)
+        throw new OverflowException();
+
+      BigInteger result = value.Numerator / value.Denominator;
+
+      if (result < long.MinValue || result > long.MaxValue)
+        throw new OverflowException();
+
+      return (long)result;
+    }
 
     /// <summary>
     /// From Decimal
