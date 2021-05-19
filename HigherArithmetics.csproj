@@ -6,7 +6,9 @@
     <AssemblyOriginatorKeyFile>HigherArithmetics.snk</AssemblyOriginatorKeyFile>
     <Authors>Dmitry Bychenko</Authors>
     <Product>Higher Arithmetics (Number Theory) library</Product>
-    <Description>Number Theory; Integer and Rational Math library</Description>
+    <Description>Number Theory;
+Integer and Rational Math library; 
+Combinatorics Linq</Description>
     <Copyright>Copyright (c) 2021 by Dmitry Bychenko</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -14,7 +16,7 @@
     <RepositoryUrl>https://github.com/Dmitry-Bychenko/HigherArithmetics</RepositoryUrl>
     <PackageTags>Number Theory Integer Math</PackageTags>
     <Version>1.0.0.7</Version>
-    <PackageReleaseNotes>Continued Fractions</PackageReleaseNotes>
+    <PackageReleaseNotes>BigRational Improvements</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
