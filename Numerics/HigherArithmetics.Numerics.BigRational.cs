@@ -405,7 +405,7 @@ namespace HigherArithmetics.Numerics {
     /// </summary>
     public BigRational Frac() => Denominator == 0
       ? this
-      : new BigRational(Numerator % Denominator, 1);
+      : new BigRational(Numerator % Denominator, Denominator);
 
     /// <summary>
     /// Floor
