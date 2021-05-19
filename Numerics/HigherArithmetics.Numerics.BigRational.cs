@@ -215,6 +215,18 @@ namespace HigherArithmetics.Numerics {
     public BigRational(BigInteger value) : this(value, 1) { }
 
     /// <summary>
+    /// Standard rational constuctor (from integer)
+    /// </summary>
+    /// <param name="value">integer value</param>
+    public BigRational(int value) : this((BigInteger)value, 1) { }
+
+    /// <summary>
+    /// Standard rational constuctor (from integer)
+    /// </summary>
+    /// <param name="value">integer value</param>
+    public BigRational(long value) : this((BigInteger)value, 1) { }
+
+    /// <summary>
     /// From Decimal value
     /// </summary>
     /// <param name="value">Decimal value</param>
@@ -225,8 +237,152 @@ namespace HigherArithmetics.Numerics {
 
       int sign = 1 - ((bits[3] >> 31) & 1) * 2;
 
-      Numerator = nom * sign;
-      Denominator = BigInteger.Pow(10, (bits[3] >> 16) & 0xFF);
+      BigInteger factor = BigInteger.Pow(10, (bits[3] >> 16) & 0xFF);
+
+      var gcd = BigInteger.GreatestCommonDivisor(factor, nom);
+
+      Numerator = nom * sign / gcd;
+      Denominator = factor / gcd;
+    }
+
+    /// <summary>
+    /// From Float value
+    /// </summary>
+    /// <param name="value">Float value</param>
+    public BigRational (float value) {
+      if (0 == value) {
+        Numerator = 0;
+        Denominator = 1;
+
+        return;
+      }
+
+      if (float.IsPositiveInfinity(value)) {
+        Numerator = 1;
+        Denominator = 0;
+
+        return;
+      }
+
+      if (float.IsNegativeInfinity(value)) {
+        Numerator = -1;
+        Denominator = 0;
+
+        return;
+      }
+
+      if (float.IsNaN(value)) {
+        Numerator = 0;
+        Denominator = 0;
+
+        return;
+      }
+
+      byte[] bits = BitConverter.GetBytes(value);
+
+      int sign = 1 - ((bits[3] >> 7) & 1) * 2;
+
+      bits[3] = (byte)((bits[3] | 0x80) ^ 0x80);
+
+      int exp = ((((int)(bits[3])) << 1) | (bits[2] >> 7)) - 127;
+
+      BigInteger mantissa = (bits[2] | 128);
+
+      mantissa <<= 16;
+
+      for (int i = 1; i >= 0; --i) {
+        int item = bits[i];
+
+        BigInteger term = ((BigInteger)item) << (i * 8);
+
+        mantissa += term; //((BigInteger)item) << (i * 8);
+      }
+
+      mantissa *= sign;
+
+      exp = 23 - exp;
+
+      if (exp < 0) {
+        Numerator = mantissa * BigInteger.Pow(2, -exp);
+        Denominator = 1;
+      }
+      else {
+        BigInteger factor = BigInteger.Pow(2, exp);
+
+        var gcd = BigInteger.GreatestCommonDivisor(factor, mantissa < 0 ? -mantissa : mantissa);
+
+        Numerator = mantissa / gcd;
+        Denominator = factor / gcd;
+      }
+    }
+
+    /// <summary>
+    /// From Double value
+    /// </summary>
+    /// <param name="value">Double value</param>
+    public BigRational (double value) {
+      if (0 == value) {
+        Numerator = 0;
+        Denominator = 1;
+
+        return;
+      }
+
+      if (double.IsPositiveInfinity(value)) {
+        Numerator = 1;
+        Denominator = 0;
+
+        return;
+      }
+      
+      if (double.IsNegativeInfinity(value)) {
+        Numerator = -1;
+        Denominator = 0;
+
+        return;
+      }
+      
+      if (double.IsNaN(value)) {
+        Numerator = 0;
+        Denominator = 0;
+
+        return;
+      }
+      
+      byte[] bits = BitConverter.GetBytes(value);
+
+      int sign = 1 - ((bits[7] >> 7) & 1) * 2;
+
+      bits[7] = (byte)((bits[7] | 0x80) ^ 0x80);
+
+      int exp = ((((int)(bits[7])) << 4) | (bits[6] >> 4)) - 1023;
+
+      BigInteger mantissa = (bits[6] & 0xF) + 16;
+
+      mantissa <<= 48;
+
+      for (int i = 5; i >= 0; --i) {
+        int item = bits[i];
+
+        mantissa += ((BigInteger)item) << (i * 8);
+      }
+
+      mantissa *= sign;
+
+      exp = 52 - exp;
+
+      if (exp < 0) {
+        Numerator = mantissa * BigInteger.Pow(2, -exp);
+        Denominator = 1;
+      }
+      else {
+        BigInteger factor = BigInteger.Pow(2, exp);
+
+        var gcd = BigInteger.GreatestCommonDivisor(factor, mantissa < 0 ? -mantissa : mantissa);
+
+        Numerator = mantissa / gcd;
+        Denominator = factor / gcd;
+      }
     }
 
     /// <summary>
@@ -705,6 +861,16 @@ namespace HigherArithmetics.Numerics {
     /// From Decimal
     /// </summary>
     public static implicit operator BigRational(decimal value) => new(value);
+
+    /// <summary>
+    /// From Float (Single)
+    /// </summary>
+    public static implicit operator BigRational(float value) => new(value);
+
+    /// <summary>
+    /// From Double
+    /// </summary>
+    public static implicit operator BigRational(double value) => new(value);
 
     #endregion Cast
 
