@@ -500,6 +500,59 @@ namespace HigherArithmetics.Numerics {
       }
     }
 
+    /// <summary>
+    /// To radix representation (eg. binary, hexadecimal etc.)
+    /// </summary>
+    /// <param name="radix">Radix in [2..36] range</param>
+    /// <returns></returns>
+    public IEnumerable<char> ToRadix(int radix) {
+      if (radix < 2 || radix > 36)
+        throw new ArgumentOutOfRangeException(nameof(radix));
+
+      if (IsInfinity || IsNaN) 
+        foreach (char c in ToString())
+          yield return c;
+      
+      char DigitToChar(int v) => (char)(v < 10 ? '0' + v : 'a' + v - 10);
+
+      BigRational value = this;
+
+      if (value < 0) {
+        yield return '-';
+
+        value = -value;
+      }
+
+      BigInteger intPart = value.Numerator / value.Denominator;
+
+      if (intPart == 0)
+        yield return '0';
+      else {
+        Stack<char> digits = new Stack<char>();
+
+        for (; intPart > 0; intPart /= radix)
+          digits.Push(DigitToChar((int)(intPart % radix)));
+
+        while (digits.Count > 0)
+          yield return digits.Pop();
+      }
+
+      BigRational fracPart = value.Frac();
+
+      if (fracPart == 0)
+        yield break;
+
+      yield return '.';
+
+      while (fracPart > 0) {
+        fracPart *= radix;
+
+        yield return DigitToChar((int)(fracPart.Numerator / fracPart.Denominator));
+
+        fracPart = fracPart.Frac();
+      }
+    }
+
     #endregion Public
 
     #region Operators
