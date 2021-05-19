@@ -215,6 +215,21 @@ namespace HigherArithmetics.Numerics {
     public BigRational(BigInteger value) : this(value, 1) { }
 
     /// <summary>
+    /// From Decimal value
+    /// </summary>
+    /// <param name="value">Decimal value</param>
+    public BigRational(decimal value) {
+      int[] bits = decimal.GetBits(value);
+
+      BigInteger nom = bits[0] + bits[1] * BigInteger.Pow(2, 32) + bits[2] * BigInteger.Pow(2, 64);
+
+      int sign = 1 - ((bits[3] >> 31) & 1) * 2;
+
+      Numerator = nom * sign;
+      Denominator = BigInteger.Pow(10, (bits[3] >> 16) & 0xFF);
+    }
+
+    /// <summary>
     /// Try Parse (either natural, like "23 / 97" or decimal like "-1.45(913)e-6")
     /// </summary>
     public static bool TryParse(string value, out BigRational result) {
@@ -642,12 +657,17 @@ namespace HigherArithmetics.Numerics {
     /// <summary>
     /// From Integer
     /// </summary>
-    public static implicit operator BigRational(int value) => new(value);
+    public static implicit operator BigRational(int value) => new(value, 1);
 
     /// <summary>
     /// From Integer
     /// </summary>
-    public static implicit operator BigRational(long value) => new(value);
+    public static implicit operator BigRational(long value) => new(value, 1);
+
+    /// <summary>
+    /// From Decimal
+    /// </summary>
+    public static implicit operator BigRational(decimal value) => new(value);
 
     #endregion Cast
 
