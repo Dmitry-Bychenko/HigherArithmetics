@@ -246,6 +246,81 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
+    /// From radix representation
+    /// E.g. -3.26A0FF4 (Hex)
+    /// </summary>
+    /// <param name="value">Value in int.frac format</param>
+    /// <param name="radix">Radix to use</param>
+    public static BigRational FromRadix(IEnumerable<char> value, int radix) {
+      if (value is null)
+        throw new ArgumentNullException(nameof(value));
+
+      if (radix < 2 || radix > 36)
+        throw new ArgumentOutOfRangeException(nameof(radix));
+
+      int DigitFromChar(char c) {
+        if (c >= '0' && c <= '9')
+          return c - '0';
+        if (c >= 'a' && c <= 'z')
+          return c - 'a' + 10;
+        if (c >= 'A' && c <= 'Z')
+          return c - 'A' + 10;
+
+        return -1;
+      }
+
+      int sign = 1;
+
+      bool first = true;
+
+      BigInteger nom = 0;
+      BigInteger den = 1;
+
+      bool isFrac = false;
+
+      foreach (char c in value) {
+        if (char.IsWhiteSpace(c) || c == '_')
+          continue;
+
+        if (c == '-') {
+          sign = -sign;
+
+          if (!first)
+            throw new FormatException("Invalid Rational Value Format");
+
+          continue;
+        }
+
+        first = false;
+
+        if (c == ',' || c == '.') {
+          if (isFrac)
+            throw new FormatException("Invalid Rational Value Format");
+
+          isFrac = true;
+
+          continue;
+        }
+
+        if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
+          int d = DigitFromChar(c);
+
+          if (d < 0 || d >= radix)
+            throw new FormatException("Invalid Rational Value Format");
+
+          nom = nom * radix + d;
+
+          if (isFrac)
+            den *= radix;
+        }
+        else
+          throw new FormatException("Invalid Rational Value Format");
+      }
+
+      return new BigRational(nom * sign, den);
+    }
+
+    /// <summary>
     /// Parse
     /// </summary>
     public static BigRational Parse(string value) => TryParse(value, out var result)
@@ -835,6 +910,12 @@ namespace HigherArithmetics.Numerics {
 
       throw new FormatException("Invalid format");
     }
+
+    /// <summary>
+    /// To String
+    /// </summary>
+    public string ToString(string format) =>
+      ToString(format, CultureInfo.CurrentCulture);
 
     #endregion IFormattable
   }
