@@ -7,6 +7,7 @@
     <Authors>Dmitry Bychenko</Authors>
     <Product>Higher Arithmetics (Number Theory) library</Product>
     <Description>Number Theory;
+BirRational
 Integer and Rational Math library; 
 Combinatorics Linq</Description>
     <Copyright>Copyright (c) 2021 by Dmitry Bychenko</Copyright>
@@ -15,8 +16,9 @@ Combinatorics Linq</Description>
     <PackageIcon>Fi.png</PackageIcon>
     <RepositoryUrl>https://github.com/Dmitry-Bychenko/HigherArithmetics</RepositoryUrl>
     <PackageTags>Number Theory Integer Math</PackageTags>
-    <Version>1.0.0.7</Version>
-    <PackageReleaseNotes>BigRational Improvements</PackageReleaseNotes>
+    <Version>1.0.0.8</Version>
+    <PackageReleaseNotes>BigRational Improvements
+Low level floating point (double / single)</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
