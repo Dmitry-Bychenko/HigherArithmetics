@@ -609,6 +609,11 @@ namespace HigherArithmetics.Numerics {
     public bool IsNegativeInfinity => Numerator < 0 && Denominator == 0;
 
     /// <summary>
+    /// Is Finite (not NaN and not Infinity)
+    /// </summary>
+    public bool IsFinite => Denominator != 0;
+
+    /// <summary>
     /// Is Integer (no fractional part)
     /// </summary>
     public bool IsInteger => Denominator == 1;
