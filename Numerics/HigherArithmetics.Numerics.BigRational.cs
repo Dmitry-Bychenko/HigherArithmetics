@@ -873,9 +873,103 @@ namespace HigherArithmetics.Numerics {
     public static implicit operator BigRational(float value) => new(value);
 
     /// <summary>
+    /// To Float (Single)
+    /// </summary>
+    public static explicit operator float(BigRational value) {
+      if (value.IsNaN)
+        return float.NaN;
+      if (value.IsNegativeInfinity)
+        return float.NegativeInfinity;
+      if (value.IsPositiveInfinity)
+        return float.PositiveInfinity;
+      if (value == 0)
+        return 0;
+      if (value.IsInteger)
+        return (float)(value.Numerator);
+
+      long exp = value.Numerator.GetBitLength() - value.Denominator.GetBitLength();
+
+      if (exp < -10000 || exp > 10000)
+        throw new OverflowException();
+
+      int e = (int)exp;
+
+      BigRational mantissa = e >= 0
+        ? value.Abs() / BigInteger.Pow(2, e)
+        : value.Abs() * BigInteger.Pow(2, -e);
+
+      long m = mantissa
+        .ToRadix(2)
+        .Where(c => c == '1' || c == '0')
+        .Select(c => c - '0')
+        .Concat(new int[24])
+        .Take(25)
+        .Aggregate(0L, (s, a) => s * 2 + a);
+
+      if (value < 0)
+        m = -m;
+
+      e -= 24;
+
+      try {
+        return FloatingPoint.ConstructSingle(m, e);
+      }
+      catch (ArgumentOutOfRangeException ex) {
+        throw new OverflowException("Overflow when converting to single", ex);
+      }
+    }
+
+    /// <summary>
     /// From Double
     /// </summary>
     public static implicit operator BigRational(double value) => new(value);
+
+    /// <summary>
+    /// To Double
+    /// </summary>
+    public static explicit operator double(BigRational value) {
+      if (value.IsNaN)
+        return double.NaN;
+      if (value.IsNegativeInfinity)
+        return double.NegativeInfinity;
+      if (value.IsPositiveInfinity)
+        return double.PositiveInfinity;
+      if (value == 0)
+        return 0;
+      if (value.IsInteger)
+        return (double)(value.Numerator);
+
+      long exp = value.Numerator.GetBitLength() - value.Denominator.GetBitLength();
+
+      if (exp < -10000 || exp > 10000)
+        throw new OverflowException();
+
+      int e = (int)exp;
+
+      BigRational mantissa = e >= 0
+        ? value.Abs() / BigInteger.Pow(2, e)
+        : value.Abs() * BigInteger.Pow(2, -e);
+
+      long m = mantissa
+        .ToRadix(2)
+        .Where(c => c == '1' || c == '0')
+        .Select(c => c - '0')
+        .Concat(new int[52])
+        .Take(53)
+        .Aggregate(0L, (s, a) => s * 2 + a);
+
+      if (value < 0)
+        m = -m;
+
+      e -= 52;
+
+      try {
+        return FloatingPoint.ConstructDouble(m, e);
+      }
+      catch (ArgumentOutOfRangeException ex) {
+        throw new OverflowException("Overflow when converting to double", ex);
+      }
+    }
 
     #endregion Cast
 
