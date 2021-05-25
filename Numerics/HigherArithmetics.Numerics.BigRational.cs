@@ -840,7 +840,135 @@ namespace HigherArithmetics.Numerics {
         throw new OverflowException();
 
       return (int)result;
-    } 
+    }
+
+    /// <summary>
+    /// From Signed Byte
+    /// </summary>
+    [CLSCompliant(false)]
+    public static implicit operator BigRational(sbyte value) => new(value, 1);
+
+    /// <summary>
+    /// To Signed Byte
+    /// </summary>
+    [CLSCompliant(false)]
+    public static explicit operator sbyte(BigRational value) {
+      if (value.IsNaN || value.IsInfinity)
+        throw new OverflowException();
+
+      BigInteger result = value.Numerator / value.Denominator;
+
+      if (result < sbyte.MinValue || result > sbyte.MaxValue)
+        throw new OverflowException();
+
+      return (sbyte)result;
+    }
+
+    /// <summary>
+    /// From Byte
+    /// </summary>
+    public static implicit operator BigRational(byte value) => new(value, 1);
+
+    /// <summary>
+    /// To Byte
+    /// </summary>
+    public static explicit operator byte(BigRational value) {
+      if (value.IsNaN || value.IsInfinity)
+        throw new OverflowException();
+
+      BigInteger result = value.Numerator / value.Denominator;
+
+      if (result < byte.MinValue || result > byte.MaxValue)
+        throw new OverflowException();
+
+      return (byte)result;
+    }
+
+    /// <summary>
+    /// From Short
+    /// </summary>
+    public static implicit operator BigRational(short value) => new(value, 1);
+
+    /// <summary>
+    /// To Short
+    /// </summary>
+    public static explicit operator short(BigRational value) {
+      if (value.IsNaN || value.IsInfinity)
+        throw new OverflowException();
+
+      BigInteger result = value.Numerator / value.Denominator;
+
+      if (result < short.MinValue || result > short.MaxValue)
+        throw new OverflowException();
+
+      return (short)result;
+    }
+
+    /// <summary>
+    /// From UInt16
+    /// </summary>
+    [CLSCompliant(false)]
+    public static implicit operator BigRational(ushort value) => new(value, 1);
+
+    /// <summary>
+    /// To UInt16
+    /// </summary>
+    [CLSCompliant(false)]
+    public static explicit operator ushort(BigRational value) {
+      if (value.IsNaN || value.IsInfinity)
+        throw new OverflowException();
+
+      BigInteger result = value.Numerator / value.Denominator;
+
+      if (result < ushort.MinValue || result > ushort.MaxValue)
+        throw new OverflowException();
+
+      return (UInt16)result;
+    }
+
+    /// <summary>
+    /// From UInt32
+    /// </summary>
+    [CLSCompliant(false)]
+    public static implicit operator BigRational(uint value) => new(value, 1);
+
+    /// <summary>
+    /// To UInt32
+    /// </summary>
+    [CLSCompliant(false)]
+    public static explicit operator uint(BigRational value) {
+      if (value.IsNaN || value.IsInfinity)
+        throw new OverflowException();
+
+      BigInteger result = value.Numerator / value.Denominator;
+
+      if (result < uint.MinValue || result > uint.MaxValue)
+        throw new OverflowException();
+
+      return (uint)result;
+    }
+
+    /// <summary>
+    /// From UInt64
+    /// </summary>
+    [CLSCompliant(false)]
+    public static implicit operator BigRational(ulong value) => new(value, 1);
+
+    /// <summary>
+    /// To UInt64
+    /// </summary>
+    [CLSCompliant(false)]
+    public static explicit operator ulong(BigRational value) {
+      if (value.IsNaN || value.IsInfinity)
+        throw new OverflowException();
+
+      BigInteger result = value.Numerator / value.Denominator;
+
+      if (result < ulong.MinValue || result > ulong.MaxValue)
+        throw new OverflowException();
+
+      return (ulong)result;
+    }
 
     /// <summary>
     /// From Integer
