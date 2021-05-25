@@ -231,20 +231,22 @@ namespace HigherArithmetics.Numerics {
     /// </summary>
     /// <param name="value">Decimal value</param>
     public BigRational(decimal value) {
-      int[] bits = decimal.GetBits(value);
+      var (m, e) = Decimals.DeconstructDecimal(value);
 
-      BigInteger nom = bits[0] + bits[1] * BigInteger.Pow(2, 32) + bits[2] * BigInteger.Pow(2, 64);
+      var nom = m;
+      BigInteger den = 1;
 
-      int sign = 1 - ((bits[3] >> 31) & 1) * 2;
+      if (e > 0)
+        nom *= BigInteger.Pow(10, e);
+      else
+        den = BigInteger.Pow(10, -e);
 
-      BigInteger factor = BigInteger.Pow(10, (bits[3] >> 16) & 0xFF);
+      var gcd = BigInteger.GreatestCommonDivisor(BigInteger.Abs(den), nom);
 
-      var gcd = BigInteger.GreatestCommonDivisor(factor, nom);
-
-      Numerator = nom * sign / gcd;
-      Denominator = factor / gcd;
+      Numerator = nom / gcd;
+      Denominator = den / gcd;
     }
-
+       
     /// <summary>
     /// From Float value
     /// </summary>
@@ -994,6 +996,61 @@ namespace HigherArithmetics.Numerics {
     /// From Decimal
     /// </summary>
     public static implicit operator BigRational(decimal value) => new(value);
+
+    /// <summary>
+    /// To Decimal
+    /// </summary>
+    public static explicit operator decimal (BigRational value) {
+      if (!value.IsFinite)
+        throw new InvalidCastException("Not a finite ratio");
+      if (value == 0)
+        return 0;
+
+      long exp = value.Numerator.GetBitLength() - value.Denominator.GetBitLength();
+
+      if (exp < -10000 || exp > 10000)
+        throw new OverflowException();
+
+      BigRational mantissa = value.Abs();
+
+      var data = mantissa
+        .ToRadix(10)
+        .Select(c => c - '0')
+        .Take(30);
+
+      BigInteger m = 0;
+      bool flag = false;
+
+      int e = 0;
+
+      foreach (int d in data) {
+        if (d < 0 || d > 9) {
+          flag = true;
+
+          continue;
+        }
+
+        m = m * 10 + d;
+
+        if (flag)
+          e -= 1;
+      }
+
+      while (m > 0 && m % 10 == 0) {
+        m /= 10;
+        e += 1;
+      }
+
+      if (value < 0)
+        m = -m;
+
+      try {
+        return Decimals.ConstructDecimal(m, e);
+      }
+      catch (ArgumentOutOfRangeException ex) {
+        throw new OverflowException("Overflow when converting to Decimal", ex);
+      }
+    }
 
     /// <summary>
     /// From Float (Single)
