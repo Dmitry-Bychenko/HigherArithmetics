@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Numerics;
 
+using HigherArithmetics.Numerics;
+
 namespace HigherArithmetics {
 
   //-------------------------------------------------------------------------------------------------------------------
@@ -22,6 +24,9 @@ namespace HigherArithmetics {
     private static readonly ConcurrentDictionary<(int n, int k), BigInteger> s_KnownEulerFirst = new();
 
     private static readonly ConcurrentDictionary<(int n, int k), BigInteger> s_KnownEulerSecond = new();
+
+    private static readonly ConcurrentDictionary<int, BigRational> s_KnownBernoulli = new ();
+
 
     #endregion Private Data
 
@@ -54,6 +59,34 @@ namespace HigherArithmetics {
         factor[2] = a21;
         factor[3] = a22;
       }
+
+      return result;
+    }
+        
+    private static BigRational CoreBenoulli(int m) {
+      if (m < 0)
+        return 0;
+      if (m % 2 != 0)
+        return m == 1 ? new BigRational(1, 2) : 0;
+      if (m == 0)
+        return 1;
+
+      if (s_KnownBernoulli.TryGetValue(m, out BigRational known))
+        return known;
+
+      BigRational result = 0;
+
+      BigInteger factor = 1;
+
+      for (int k = 0; k < m; ++k) {
+        result += factor * CoreBenoulli(k) / (m - k + 1);
+
+        factor = factor * (m - k) / (k + 1);
+      }
+
+      result = 1 - result;
+
+      s_KnownBernoulli.TryAdd(m, result);
 
       return result;
     }
@@ -195,6 +228,18 @@ namespace HigherArithmetics {
         result += StirlingSecond(n, k);
 
       return result;
+    }
+
+    /// <summary>
+    /// Bernoulli number
+    /// </summary>
+    /// <param name="n">Argument</param>
+    /// <param name="isPositive">If 1st number is positive 1/2 or negative -1/2</param>
+    public static BigRational Bernoulli(int n, bool isPositive = true) {
+      if (!isPositive && n == 1)
+        return new BigRational(-1, 2);
+
+      return CoreBenoulli(n);
     }
 
     #endregion Public
