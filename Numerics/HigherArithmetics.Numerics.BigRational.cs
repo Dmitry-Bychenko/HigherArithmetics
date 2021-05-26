@@ -621,11 +621,23 @@ namespace HigherArithmetics.Numerics {
     public bool IsInteger => Denominator == 1;
 
     /// <summary>
+    /// Is Proper Fraction
+    /// </summary>
+    public bool IsProperFraction => BigInteger.Abs(Numerator) < BigInteger.Abs(Denominator);
+
+    /// <summary>
     /// Absolute Value 
     /// </summary>
     public BigRational Abs() => Numerator < 0
       ? new BigRational(-Numerator, Denominator)
       : this;
+
+    /// <summary>
+    /// Sign (-1, +1, 0)
+    /// </summary>
+    public int Sign() => Numerator > 0 ? 1
+                       : Numerator < 0 ? -1
+                       : 0;
 
     /// <summary>
     /// Power
