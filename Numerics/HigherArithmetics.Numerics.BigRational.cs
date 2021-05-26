@@ -731,6 +731,19 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
+    /// Integer Division 
+    /// </summary>
+    public BigInteger Div(BigRational value) =>
+      (Numerator * value.Denominator) / (value.Numerator * Denominator);
+
+    /// <summary>
+    /// Remainder
+    /// </summary>
+    public BigRational Rem(BigRational value) =>
+      new((Numerator * value.Denominator) % (value.Numerator * Denominator),
+            Denominator * value.Denominator);
+
+    /// <summary>
     /// Round
     /// </summary>
     public BigRational Round() => Round(MidpointRounding.ToEven);

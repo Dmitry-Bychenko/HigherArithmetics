@@ -27,7 +27,6 @@ namespace HigherArithmetics {
 
     private static readonly ConcurrentDictionary<int, BigRational> s_KnownBernoulli = new ();
 
-
     #endregion Private Data
 
     #region Algorithm
