@@ -616,6 +616,22 @@ namespace HigherArithmetics.Numerics {
     public bool IsFinite => Denominator != 0;
 
     /// <summary>
+    /// Is One (1)
+    /// </summary>
+    public bool IsOne => Numerator.IsOne && Denominator.IsOne;
+
+    /// <summary>
+    /// Is Zero (0)
+    /// </summary>
+    public bool IsZero => Numerator.IsZero && Denominator.IsOne;
+
+    /// <summary>
+    /// Is Power Of Two
+    /// </summary>
+    public bool IsPowerOfTwo => Numerator.IsOne && Denominator.IsPowerOfTwo ||
+                                Numerator.IsPowerOfTwo && Denominator.IsOne;
+
+    /// <summary>
     /// Is Integer (no fractional part)
     /// </summary>
     public bool IsInteger => Denominator == 1;

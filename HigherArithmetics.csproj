@@ -16,9 +16,8 @@ Combinatorics Linq</Description>
     <PackageIcon>Fi.png</PackageIcon>
     <RepositoryUrl>https://github.com/Dmitry-Bychenko/HigherArithmetics</RepositoryUrl>
     <PackageTags>Integer Math: Number Theory, BigRational, Combinatorics</PackageTags>
-    <Version>1.0.0.8</Version>
-    <PackageReleaseNotes>BigRational Improvements
-Low level floating point (double / single)</PackageReleaseNotes>
+    <Version>1.0.0.9</Version>
+    <PackageReleaseNotes>BigRational Improvements</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
