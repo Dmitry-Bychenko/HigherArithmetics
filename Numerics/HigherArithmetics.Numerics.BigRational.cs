@@ -246,12 +246,12 @@ namespace HigherArithmetics.Numerics {
       Numerator = nom / gcd;
       Denominator = den / gcd;
     }
-       
+
     /// <summary>
     /// From Float value
     /// </summary>
     /// <param name="value">Float value</param>
-    public BigRational (float value) {
+    public BigRational(float value) {
       if (0 == value) {
         Numerator = 0;
         Denominator = 1;
@@ -322,7 +322,7 @@ namespace HigherArithmetics.Numerics {
     /// From Double value
     /// </summary>
     /// <param name="value">Double value</param>
-    public BigRational (double value) {
+    public BigRational(double value) {
       if (0 == value) {
         Numerator = 0;
         Denominator = 1;
@@ -336,21 +336,21 @@ namespace HigherArithmetics.Numerics {
 
         return;
       }
-      
+
       if (double.IsNegativeInfinity(value)) {
         Numerator = -1;
         Denominator = 0;
 
         return;
       }
-      
+
       if (double.IsNaN(value)) {
         Numerator = 0;
         Denominator = 0;
 
         return;
       }
-      
+
       byte[] bits = BitConverter.GetBytes(value);
 
       int sign = 1 - ((bits[7] >> 7) & 1) * 2;
@@ -736,10 +736,10 @@ namespace HigherArithmetics.Numerics {
       }
       if (Numerator == 0)
         return double.NegativeInfinity;
-           
+
       return BigInteger.Log(Numerator, baseValue) - BigInteger.Log(Denominator, baseValue);
     }
-    
+
     /// <summary>
     /// Truncate (integer part) 
     /// </summary>
@@ -869,10 +869,10 @@ namespace HigherArithmetics.Numerics {
       if (radix < 2 || radix > 36)
         throw new ArgumentOutOfRangeException(nameof(radix));
 
-      if (IsInfinity || IsNaN) 
+      if (IsInfinity || IsNaN)
         foreach (char c in ToString())
           yield return c;
-      
+
       static char DigitToChar(int v) => (char)(v < 10 ? '0' + v : 'a' + v - 10);
 
       BigRational value = this;
@@ -888,7 +888,7 @@ namespace HigherArithmetics.Numerics {
       if (intPart == 0)
         yield return '0';
       else {
-        Stack<char> digits = new ();
+        Stack<char> digits = new();
 
         for (; intPart > 0; intPart /= radix)
           digits.Push(DigitToChar((int)(intPart % radix)));
@@ -927,8 +927,8 @@ namespace HigherArithmetics.Numerics {
     /// <summary>
     /// To Integer
     /// </summary>
-    public static explicit operator BigInteger(BigRational value) => value.IsNaN || value.IsInfinity 
-      ? throw new OverflowException() 
+    public static explicit operator BigInteger(BigRational value) => value.IsNaN || value.IsInfinity
+      ? throw new OverflowException()
       : value.Numerator / value.Denominator;
 
     /// <summary>
@@ -1107,7 +1107,7 @@ namespace HigherArithmetics.Numerics {
     /// <summary>
     /// To Decimal
     /// </summary>
-    public static explicit operator decimal (BigRational value) {
+    public static explicit operator decimal(BigRational value) {
       if (!value.IsFinite)
         throw new InvalidCastException("Not a finite ratio");
       if (value == 0)

@@ -79,7 +79,7 @@ namespace HigherArithmetics.Linq {
         yield return indexes
           .Select(i => alphabet[i])
           .ToArray();
-               
+
         for (int i = indexes.Length - 1; i >= 0; --i)
           if (indexes[i] >= alphabet.Length - 1)
             indexes[i] = 0;
@@ -247,7 +247,7 @@ namespace HigherArithmetics.Linq {
 
       yield return Array.Empty<T>();
 
-      if (unique.Length <= 0) 
+      if (unique.Length <= 0)
         yield break;
 
       for (int size = 1; ; ++size)

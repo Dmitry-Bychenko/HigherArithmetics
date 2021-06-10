@@ -1,8 +1,7 @@
-﻿using System.Collections.Concurrent;
+﻿using HigherArithmetics.Numerics;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Numerics;
-
-using HigherArithmetics.Numerics;
 
 namespace HigherArithmetics {
 
@@ -25,7 +24,7 @@ namespace HigherArithmetics {
 
     private static readonly ConcurrentDictionary<(int n, int k), BigInteger> s_KnownEulerSecond = new();
 
-    private static readonly ConcurrentDictionary<int, BigRational> s_KnownBernoulli = new ();
+    private static readonly ConcurrentDictionary<int, BigRational> s_KnownBernoulli = new();
 
     #endregion Private Data
 
@@ -61,7 +60,7 @@ namespace HigherArithmetics {
 
       return result;
     }
-        
+
     private static BigRational CoreBenoulli(int m) {
       if (m < 0)
         return 0;
