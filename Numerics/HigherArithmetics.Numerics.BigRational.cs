@@ -581,6 +581,18 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
+    /// Min
+    /// </summary>
+    public static BigRational Min(BigRational left, BigRational right) =>
+      left <= right ? left : right;
+
+    /// <summary>
+    /// Max
+    /// </summary>
+    public static BigRational Max(BigRational left, BigRational right) =>
+      left >= right ? left : right;
+
+    /// <summary>
     /// Numerator
     /// </summary>
     public BigInteger Numerator { get; }
@@ -674,6 +686,60 @@ namespace HigherArithmetics.Numerics {
         return new BigRational(BigInteger.Pow(Denominator, -exponent), BigInteger.Pow(Numerator, -exponent));
     }
 
+    /// <summary>
+    /// Log10
+    /// </summary>
+    public double Log10() {
+      if (Numerator < 0)
+        return double.NaN;
+      if (Denominator == 0) {
+        if (Numerator > 0)
+          return double.PositiveInfinity;
+
+        return double.NaN;
+      }
+      if (Numerator == 0)
+        return double.NegativeInfinity;
+
+      return BigInteger.Log10(Numerator) - BigInteger.Log10(Denominator);
+    }
+
+    /// <summary>
+    /// Log (natural)
+    /// </summary>
+    public double Log() {
+      if (Numerator < 0)
+        return double.NaN;
+      if (Denominator == 0) {
+        if (Numerator > 0)
+          return double.PositiveInfinity;
+
+        return double.NaN;
+      }
+      if (Numerator == 0)
+        return double.NegativeInfinity;
+
+      return BigInteger.Log(Numerator) - BigInteger.Log(Denominator);
+    }
+
+    /// <summary>
+    /// Log 
+    /// </summary>
+    public double Log(double baseValue) {
+      if (Numerator < 0)
+        return double.NaN;
+      if (Denominator == 0) {
+        if (Numerator > 0)
+          return double.PositiveInfinity;
+
+        return double.NaN;
+      }
+      if (Numerator == 0)
+        return double.NegativeInfinity;
+           
+      return BigInteger.Log(Numerator, baseValue) - BigInteger.Log(Denominator, baseValue);
+    }
+    
     /// <summary>
     /// Truncate (integer part) 
     /// </summary>
