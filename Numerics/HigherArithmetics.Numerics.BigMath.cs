@@ -118,6 +118,29 @@ namespace HigherArithmetics.Numerics {
       return result < 0 ? -result : result;
     }
 
+    /// <summary>
+    /// Number Of Digits
+    /// </summary>
+    public static int NumberOfDigits(this BigInteger value) {
+      if (value.IsZero)
+        return 1;
+
+      int exp = (int)(value.GetBitLength() * 0.30102999566398);
+
+      int result = exp;
+
+      BigInteger power = BigInteger.Pow(10, exp);
+
+      value = value / power;
+
+      while (value != 0) {
+        value /= 10;
+        result += 1;
+      }
+
+      return result;
+    }
+
     #endregion Public
   }
 
