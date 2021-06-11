@@ -78,6 +78,46 @@ namespace HigherArithmetics.Numerics {
       return result;
     }
 
+    /// <summary>
+    /// First digits
+    /// </summary>
+    public static BigInteger FirstDigits(this BigInteger value, int digits) {
+      if (digits <= 0)
+        throw new ArgumentOutOfRangeException(nameof(digits));
+
+      if (value.IsZero)
+        return value;
+
+      int exp = (int)(value.GetBitLength() * 0.30102999566398 - digits);
+
+      if (exp <= 0)
+        return value < 0 ? -value : value;
+
+      BigInteger result = value / BigInteger.Pow(10, exp);
+
+      if (result < 0)
+        result = -result;
+
+      BigInteger power = BigInteger.Pow(10, digits);
+
+      while (result >= power)
+        result /= 10;
+
+      return result;
+    }
+
+    /// <summary>
+    /// Last digits
+    /// </summary>
+    public static BigInteger LastDigits(this BigInteger value, int digits) {
+      if (digits <= 0)
+        throw new ArgumentOutOfRangeException(nameof(digits));
+
+      BigInteger result = value % BigInteger.Pow(10, digits);
+
+      return result < 0 ? -result : result;
+    }
+
     #endregion Public
   }
 
