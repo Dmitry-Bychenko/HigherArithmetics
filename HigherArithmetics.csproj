@@ -17,7 +17,7 @@ Combinatorics Linq</Description>
     <RepositoryUrl>https://github.com/Dmitry-Bychenko/HigherArithmetics</RepositoryUrl>
     <PackageTags>Integer Math: Number Theory, BigRational, Combinatorics</PackageTags>
     <Version>1.0.0.9</Version>
-    <PackageReleaseNotes>BigRational Improvements</PackageReleaseNotes>
+    <PackageReleaseNotes>BigRational Improvements, Linq</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

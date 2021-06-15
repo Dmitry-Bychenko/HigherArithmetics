@@ -40,6 +40,15 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
+    /// Digit Root
+    /// </summary>
+    public static int DigitRoot(this BigInteger value) {
+      int root = (int) (value >= 0 ? value % 9 : -value % 9);
+
+      return root == 0 ? 9 : root;
+    }
+
+    /// <summary>
     /// Sqrt (lower bound)
     /// </summary>
     public static BigInteger Sqrt(this BigInteger value) {
@@ -131,7 +140,7 @@ namespace HigherArithmetics.Numerics {
 
       BigInteger power = BigInteger.Pow(10, exp);
 
-      value = value / power;
+      value /= power;
 
       while (value != 0) {
         value /= 10;
