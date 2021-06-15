@@ -257,6 +257,19 @@ namespace HigherArithmetics {
       bool orderMatters) where T : IComparable<T> =>
       CombinationsCount(source, take, withRepetitions, orderMatters, null);
 
+    /// <summary>
+    /// Parity
+    /// </summary>
+    /// <see cref="https://mathworld.wolfram.com/Parity.html"/>
+    public static int Parity(BigInteger value) {
+      int result = 0;
+
+      for (BigInteger v = value < 0 ? -value : value; v > 0; v /= 2)
+        result ^= (int)(v % 2);
+
+      return result;
+    }
+
     #endregion General
 
     #region Number Theory
