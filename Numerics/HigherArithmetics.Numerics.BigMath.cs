@@ -43,7 +43,7 @@ namespace HigherArithmetics.Numerics {
     /// Digit Root
     /// </summary>
     public static int DigitRoot(this BigInteger value) {
-      int root = (int) (value >= 0 ? value % 9 : -value % 9);
+      int root = (int)(value >= 0 ? value % 9 : -value % 9);
 
       return root == 0 ? 9 : root;
     }
