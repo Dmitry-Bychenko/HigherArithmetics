@@ -227,6 +227,28 @@ namespace HigherArithmetics.Numerics {
     public BigRational(long value) : this((BigInteger)value, 1) { }
 
     /// <summary>
+    /// From character numeric value ⅝ => 5 / 8
+    /// </summary>
+    public BigRational(char value) {
+      if (char.GetNumericValue(value) < 0) {
+        Numerator = 0;
+        Denominator = 0;
+
+        return;
+      }
+
+      long factor = 1_260_000;
+
+      BigInteger numerator = (long)(char.GetNumericValue(value) * factor + 0.5);
+      BigInteger denominator = factor;
+
+      var gcd = BigInteger.GreatestCommonDivisor(denominator, numerator < 0 ? -numerator : numerator);
+
+      Numerator = numerator / gcd;
+      Denominator = denominator / gcd;
+    }
+
+    /// <summary>
     /// From Decimal value
     /// </summary>
     /// <param name="value">Decimal value</param>
@@ -918,6 +940,11 @@ namespace HigherArithmetics.Numerics {
     #region Operators
 
     #region Cast 
+
+    /// <summary>
+    /// From Character Numeric Value
+    /// </summary>
+    public static implicit operator BigRational(char value) => new(value);
 
     /// <summary>
     /// From Integer
