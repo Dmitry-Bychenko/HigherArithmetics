@@ -18,7 +18,7 @@ Linq</Description>
     <RepositoryUrl>https://github.com/Dmitry-Bychenko/HigherArithmetics</RepositoryUrl>
     <PackageTags>Integer Math: Number Theory, BigRational, Combinatorics</PackageTags>
     <Version>1.0.0.10</Version>
-    <PackageReleaseNotes>Rational Splines</PackageReleaseNotes>
+    <PackageReleaseNotes>Rational Splines; Character To Rational</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
