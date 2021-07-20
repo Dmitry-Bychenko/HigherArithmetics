@@ -533,6 +533,11 @@ namespace HigherArithmetics.Numerics {
     public static BigRational One => new(1, 1);
 
     /// <summary>
+    /// Minus One
+    /// </summary>
+    public static BigRational MinusOne => new(-1, 1);
+
+    /// <summary>
     /// NaN
     /// </summary>
     public static BigRational NaN => new(0, 0);
