@@ -230,6 +230,13 @@ namespace HigherArithmetics.Numerics {
     /// From character numeric value ⅝ => 5 / 8
     /// </summary>
     public BigRational(char value) {
+      if (value == '∞') {
+        Numerator = 1;
+        Denominator = 0;
+
+        return;
+      }
+
       if (char.GetNumericValue(value) < 0) {
         Numerator = 0;
         Denominator = 0;
