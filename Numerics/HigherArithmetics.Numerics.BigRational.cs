@@ -714,6 +714,23 @@ namespace HigherArithmetics.Numerics {
                        : 0;
 
     /// <summary>
+    /// Clamp
+    /// </summary>
+    /// <param name="min">Minimum Border</param>
+    /// <param name="max">Maximum Border</param>
+    public BigRational Clamp(BigRational min, BigRational max) {
+      if (min > max)
+        throw new ArgumentException($"Min value {min} can't be greater than max {max}.");
+
+      if (IsNaN)
+        return this;
+
+      return this < min ? min
+           : this > max ? max
+           : this;
+    }
+
+    /// <summary>
     /// Power
     /// </summary>
     public BigRational Pow(int exponent) {
