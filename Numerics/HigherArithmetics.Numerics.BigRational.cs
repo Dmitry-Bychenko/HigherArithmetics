@@ -637,6 +637,18 @@ namespace HigherArithmetics.Numerics {
     public BigInteger Denominator { get; }
 
     /// <summary>
+    /// Parity
+    /// </summary>
+    public Parity Parity {
+      get {
+        if (Denominator.IsEven)
+          return Parity.None;
+
+        return Numerator.IsEven ? Parity.Even : Parity.Odd;
+      }
+    }
+
+    /// <summary>
     /// Is NaN
     /// </summary>
     public bool IsNaN => Numerator == 0 && Denominator == 0;

@@ -1,22 +1,26 @@
-﻿namespace HigherArithmetics.Numerics {
+﻿namespace HigherArithmetics {
 
   //-------------------------------------------------------------------------------------------------------------------
   //
   /// <summary>
-  /// Character Extensions 
+  /// Parity: Even, Odd or None
   /// </summary>
   //
   //-------------------------------------------------------------------------------------------------------------------
 
-  public static partial class CharacterExtensions {
-    #region Public
-
+  public enum Parity {
     /// <summary>
-    /// Character (numeric value) to rational number
+    /// Odd
     /// </summary>
-    public static BigRational ToRational(this char value) => new(value);
-
-    #endregion Public
+    Odd = -1,
+    /// <summary>
+    /// None
+    /// </summary>
+    None = 0,
+    /// <summary>
+    /// Even
+    /// </summary>
+    Even = 1,
   }
 
 }
