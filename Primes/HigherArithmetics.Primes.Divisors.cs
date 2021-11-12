@@ -45,7 +45,6 @@ namespace HigherArithmetics.Primes {
           }
           else
             indexes[i] = 0;
-
       }
       while (!indexes.All(idx => idx == 0));
 
@@ -170,6 +169,91 @@ namespace HigherArithmetics.Primes {
 
       return CoreAllDivisors(PrimeDivisorsExpanded(value));
     }
+
+    /// <summary>
+    /// Sum Of Proper Divisors
+    /// </summary>
+    public static BigInteger SumOfDivisors(BigInteger value) {
+      if (value == 0 | value == 1)
+        return value;
+      if (value < 0)
+        return -SumOfDivisors(-value);
+
+      var divs = PrimeDivisorsExpanded(value)
+        .GroupBy(x => x)
+        .Select(group => (key: group.Key, count: group.Count()))
+        .ToArray();
+
+      int[] indexes = new int[divs.Length];
+
+      BigInteger result = -value;
+
+      do {
+        BigInteger divisor = 1;
+
+        for (int i = 0; i < indexes.Length; ++i) {
+          for (int k = 0; k < indexes[i]; ++k)
+            divisor *= divs[i].key;
+        }
+
+        result += divisor;
+
+        for (int i = 0; i < indexes.Length; ++i)
+          if (indexes[i] < divs[i].count) {
+            indexes[i] += 1;
+
+            break;
+          }
+          else
+            indexes[i] = 0;
+      }
+      while (!indexes.All(idx => idx == 0));
+
+      return result;
+    }
+
+    /// <summary>
+    /// Number Of Proper Divisors
+    /// </summary>
+    public static int NumberOfDivisors(BigInteger value) {
+      if (value == 0 | value == 1)
+        return 0;
+      if (value < 0)
+        return NumberOfDivisors(-value);
+
+      var divs = PrimeDivisorsExpanded(value)
+        .GroupBy(x => x)
+        .Select(group => (key: group.Key, count: group.Count()))
+        .ToArray();
+
+      int[] indexes = new int[divs.Length];
+
+      int result = -1;
+
+      do {
+        BigInteger divisor = 1;
+
+        for (int i = 0; i < indexes.Length; ++i) {
+          for (int k = 0; k < indexes[i]; ++k)
+            divisor *= divs[i].key;
+        }
+
+        result += 1;
+
+        for (int i = 0; i < indexes.Length; ++i)
+          if (indexes[i] < divs[i].count) {
+            indexes[i] += 1;
+
+            break;
+          }
+          else
+            indexes[i] = 0;
+      }
+      while (!indexes.All(idx => idx == 0));
+
+      return result;
+    }
+
 
     #endregion Public
   }
