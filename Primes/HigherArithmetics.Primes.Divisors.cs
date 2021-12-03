@@ -254,7 +254,6 @@ namespace HigherArithmetics.Primes {
       return result;
     }
 
-
     #endregion Public
   }
 
