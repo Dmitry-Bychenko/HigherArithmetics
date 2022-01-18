@@ -15,14 +15,14 @@ namespace HigherArithmetics {
     #region Public
 
     /// <summary>
-    /// To Gray code
+    /// To (binary) Gray code
     /// </summary>
     public static BigInteger ToGrayCode(BigInteger value) => value >= 0
       ? value ^ (value >> 1)
       : throw new ArgumentOutOfRangeException(nameof(value));
 
     /// <summary>
-    /// From Gray code
+    /// From (binary) Gray code
     /// </summary>
     public static BigInteger FromGrayCode(BigInteger value) {
       if (value < 0)
