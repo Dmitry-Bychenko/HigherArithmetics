@@ -1,5 +1,7 @@
 ﻿using System;
 
+using HigherArithmetics.Primes;
+
 namespace HigherArithmetics.Numerics {
 
   //-------------------------------------------------------------------------------------------------------------------
@@ -126,6 +128,45 @@ namespace HigherArithmetics.Numerics {
     /// </summary>
     public static long ModDivision(this long left, long right, long modulo) =>
       (left * ModInversion(right, modulo)) % modulo;
+
+    /// <summary>
+    /// Is Prime
+    /// </summary>
+    public static bool IsPrime(this long value) {
+      if (value <= 1)
+        return false;
+
+      if ((value % 2) == 0)
+        return (value == 2);
+      if ((value % 3) == 0)
+        return (value == 3);
+      if ((value % 5) == 0)
+        return (value == 5);
+      if ((value % 7) == 0)
+        return (value == 7);
+      if ((value % 11) == 0)
+        return (value == 11);
+
+      if (value <= KnownPrimes.MaxKnownPrime)
+        return KnownPrimes.IsKnownPrime((int)value);
+
+      if (value < int.MaxValue) {
+        long start = KnownPrimes.MaxKnownPrime;
+
+        start += start % 2 == 0 ? 1 : 0;
+        start = start < 3 ? 3 : start;
+
+        long stop = (long) (Math.Sqrt(value) + 100);
+
+        for (long d = start; d <= stop; d += 2)
+          if (value % d == 0)
+            return false;
+
+        return true;
+      }
+
+      return PrimeNumbers.RabinMillesPrimeTest(value, 5);
+    }
 
     #endregion Public
   }
