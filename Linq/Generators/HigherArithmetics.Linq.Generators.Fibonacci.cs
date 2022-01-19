@@ -3,7 +3,7 @@ using System.Linq;
 using System.Numerics;
 
 namespace HigherArithmetics.Linq.Generators {
-  
+
   //-------------------------------------------------------------------------------------------------------------------
   //
   /// <summary>
@@ -20,8 +20,8 @@ namespace HigherArithmetics.Linq.Generators {
     /// </summary>
     /// <param name="topItems">Top Items</param>
     public static IEnumerable<BigInteger> Enumerate(IEnumerable<BigInteger> topItems) {
-      BigInteger[] current = topItems is null 
-        ? new BigInteger[] { 0, 1 } 
+      BigInteger[] current = topItems is null
+        ? new BigInteger[] { 0, 1 }
         : topItems.ToArray();
 
       if (0 == current.Length)
@@ -33,7 +33,7 @@ namespace HigherArithmetics.Linq.Generators {
 
         BigInteger last = 0;
 
-        for (int i = 0; i < current.Length; ++i) 
+        for (int i = 0; i < current.Length; ++i)
           last += current[i];
 
         for (int i = 0; i < current.Length - 1; ++i)
@@ -48,7 +48,7 @@ namespace HigherArithmetics.Linq.Generators {
     /// </summary>
     /// <param name="topItems">Top Items</param>
     public static IEnumerable<BigInteger> Enumerate(params BigInteger[] topItems) =>
-      Enumerate((IEnumerable<BigInteger>) topItems);
+      Enumerate((IEnumerable<BigInteger>)topItems);
 
     /// <summary>
     /// Fibonacci items
