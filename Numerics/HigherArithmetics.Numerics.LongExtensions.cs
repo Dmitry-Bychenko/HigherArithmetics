@@ -1,6 +1,5 @@
-﻿using System;
-
-using HigherArithmetics.Primes;
+﻿using HigherArithmetics.Primes;
+using System;
 
 namespace HigherArithmetics.Numerics {
 
@@ -156,7 +155,9 @@ namespace HigherArithmetics.Numerics {
         start += start % 2 == 0 ? 1 : 0;
         start = start < 3 ? 3 : start;
 
-        long stop = (long) (Math.Sqrt(value) + 100);
+        long stop = value > (1L << 52)
+          ? Math.Min((long)(Math.Sqrt(value) + 100), value - 1)
+          : (long)(Math.Sqrt(value) + 1);
 
         for (long d = start; d <= stop; d += 2)
           if (value % d == 0)
