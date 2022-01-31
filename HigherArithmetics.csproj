@@ -19,6 +19,8 @@ Linq</Description>
     <PackageTags>Integer Math: Number Theory, BigRational, Combinatorics</PackageTags>
     <Version>1.0.0.11</Version>
     <PackageReleaseNotes>Generators</PackageReleaseNotes>
+    <PackageProjectUrl>https://github.com/Dmitry-Bychenko/HigherArithmetics</PackageProjectUrl>
+    <EnforceCodeStyleInBuild>False</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <ItemGroup>
