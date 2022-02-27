@@ -275,9 +275,7 @@ namespace HigherArithmetics.Numerics {
               m[i] = newLine;
               m[j] = line;
 
-              BigRational[] h = inverted[i];
-              inverted[i] = inverted[j];
-              inverted[j] = h;
+              (inverted[i], inverted[j]) = (inverted[j], inverted[i]);
 
               result = -result;  // < -1 each time!
 

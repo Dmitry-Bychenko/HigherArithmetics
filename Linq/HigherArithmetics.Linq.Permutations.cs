@@ -69,15 +69,10 @@ namespace HigherArithmetics.Linq {
             }
           }
 
-          T h = data[pivotIndex];
-          data[pivotIndex] = data[minIndex];
-          data[minIndex] = h;
+          (data[pivotIndex], data[minIndex]) = (data[minIndex], data[pivotIndex]);
 
-          for (int i = 0; i < (data.Length - pivotIndex) / 2; ++i) {
-            h = data[pivotIndex + 1 + i];
-            data[pivotIndex + 1 + i] = data[data.Length - 1 - i];
-            data[data.Length - 1 - i] = h;
-          }
+          for (int i = 0; i < (data.Length - pivotIndex) / 2; ++i) 
+            (data[pivotIndex + 1 + i], data[data.Length - 1 - i]) = (data[data.Length - 1 - i], data[pivotIndex + 1 + i]);
         }
       }
       while (Enumerable.Range(0, initial.Length).Any(i => comparer.Compare(initial[i], data[i]) != 0));
@@ -142,15 +137,10 @@ namespace HigherArithmetics.Linq {
             }
           }
 
-          T h = data[pivotIndex];
-          data[pivotIndex] = data[minIndex];
-          data[minIndex] = h;
+          (data[pivotIndex], data[minIndex]) = (data[minIndex], data[pivotIndex]);
 
-          for (int i = 0; i < (data.Length - pivotIndex) / 2; ++i) {
-            h = data[pivotIndex + 1 + i];
-            data[pivotIndex + 1 + i] = data[data.Length - 1 - i];
-            data[data.Length - 1 - i] = h;
-          }
+          for (int i = 0; i < (data.Length - pivotIndex) / 2; ++i) 
+            (data[pivotIndex + 1 + i], data[data.Length - 1 - i]) = (data[data.Length - 1 - i], data[pivotIndex + 1 + i]);
         }
       }
       while (Enumerable.Range(0, initial.Length).Any(i => dict[initial[i]] != dict[data[i]]));
