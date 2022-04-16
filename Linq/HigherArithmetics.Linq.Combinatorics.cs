@@ -120,12 +120,6 @@ namespace HigherArithmetics.Linq {
         if (!dict.ContainsKey(item))
           dict.Add(item, dict.Count);
 
-      if (items.Length == size) {
-        yield return items;
-
-        yield break;
-      }
-
       T[] window = new T[size];
 
       for (int i = 0; i < size; ++i)
