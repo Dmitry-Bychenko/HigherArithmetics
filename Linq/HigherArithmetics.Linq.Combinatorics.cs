@@ -96,9 +96,9 @@ namespace HigherArithmetics.Linq {
 
     // Combinations without replacement, order matters
     // {A, B, C, C} => {A, B, C}, {A, C, B}, {A, C, C}, {B, A, C}, {B, C, A}, {B, C, C}...
-    public static IEnumerable<T[]> OrderedWithoutReplacement<T>(IEnumerable<T> source,
-                                                                int size,
-                                                                IEqualityComparer<T> comparer) {
+    private static IEnumerable<T[]> OrderedWithoutReplacement<T>(IEnumerable<T> source,
+                                                                 int size,
+                                                                 IEqualityComparer<T> comparer) {
       if (source is null)
         throw new ArgumentNullException(nameof(source));
       if (size < 0)
