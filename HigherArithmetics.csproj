@@ -17,7 +17,7 @@ Linq</Description>
     <PackageIcon>Fi.png</PackageIcon>
     <RepositoryUrl>https://github.com/Dmitry-Bychenko/HigherArithmetics</RepositoryUrl>
     <PackageTags>Integer Math: Number Theory, BigRational, Combinatorics</PackageTags>
-    <Version>1.0.0.13</Version>
+    <Version>1.0.0.14</Version>
     <PackageReleaseNotes>OEIS</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/Dmitry-Bychenko/HigherArithmetics</PackageProjectUrl>
     <EnforceCodeStyleInBuild>False</EnforceCodeStyleInBuild>
