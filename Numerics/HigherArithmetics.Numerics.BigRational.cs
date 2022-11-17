@@ -12,59 +12,71 @@ namespace HigherArithmetics.Numerics {
   //-------------------------------------------------------------------------------------------------------------------
   //
   /// <summary>
-  /// Big Rational Number
+  ///     Big Rational Number
   /// </summary>
   //
   //-------------------------------------------------------------------------------------------------------------------
 
-  public struct BigRational : IEquatable<BigRational>, IComparable<BigRational>, ISerializable, IFormattable {
+  public readonly struct BigRational :
+      IEquatable<BigRational>,
+      IComparable<BigRational>,
+      ISerializable,
+      IFormattable,
+      ISpanFormattable,
+      IParsable<BigRational>,
+      ISpanParsable<BigRational>,
+      IConvertible,
+      IComparable {
     #region Create Algorithm
 
-    private static bool TryParseDecimal(string source, out BigRational result) {
-      result = BigRational.NaN;
+    private static readonly Regex s_ParseRegex = 
+      new (@"^\s*(?<sign>[+-])?\s*(?<int>[0-9]+)?(\.(?<fraction>[0-9]+)?(?<period>\([0-9]+\))?)?([eE](?<exp>[+-]?[0-9]+)?)?\s*$");
+
+    private static bool TryParseDecimal(string? source, NumberStyles styles, IFormatProvider? formatProvider,
+        out BigRational result) {
+      result = NaN;
 
       if (string.IsNullOrWhiteSpace(source))
         return false;
 
-      const string pattern =
-        @"^\s*(?<sign>[+-])?\s*(?<int>[0-9]+)?(\.(?<frac>[0-9]+)?(?<period>\([0-9]+\))?)?([eE](?<exp>[+-]?[0-9]+)?)?\s*$";
-
-      Match match = Regex.Match(source, pattern);
+      var match = s_ParseRegex.Match(source);
 
       if (!match.Success)
         return false;
 
       string signPart = match.Groups["sign"].Value;
       string intPart = match.Groups["int"].Value;
-      string fracPart = match.Groups["frac"].Value;
+      string fractionPart = match.Groups["fraction"].Value;
       string periodPart = match.Groups["period"].Value.Trim('(', ')');
       string expPart = match.Groups["exp"].Value;
 
       if (string.IsNullOrEmpty(intPart) &&
-          string.IsNullOrEmpty(fracPart) &&
+          string.IsNullOrEmpty(fractionPart) &&
           string.IsNullOrEmpty(periodPart))
         return false;
 
       result = 0;
 
       if (!string.IsNullOrEmpty(intPart))
-        result += BigInteger.Parse(intPart);
+        result += BigInteger.Parse(intPart, styles, formatProvider);
 
-      if (!string.IsNullOrEmpty(fracPart))
-        result += new BigRational(BigInteger.Parse(fracPart), BigInteger.Pow(10, fracPart.Length));
+      if (!string.IsNullOrEmpty(fractionPart))
+        result += new BigRational(BigInteger.Parse(fractionPart, styles, formatProvider),
+            BigInteger.Pow(10, fractionPart.Length));
 
       if (!string.IsNullOrEmpty(periodPart))
-        result += new BigRational(BigInteger.Parse(periodPart), BigInteger.Pow(10, periodPart.Length) - 1) /
-                  BigInteger.Pow(10, fracPart.Length);
+        result += new BigRational(BigInteger.Parse(periodPart, styles, formatProvider),
+                      BigInteger.Pow(10, periodPart.Length) - 1) /
+                  BigInteger.Pow(10, fractionPart.Length);
 
       if (!string.IsNullOrEmpty(expPart)) {
         if (!int.TryParse(expPart, out int exp) && exp > 1_000_000_000) {
-          result = BigRational.NaN;
+          result = NaN;
 
           return false;
         }
 
-        BigInteger factor = BigInteger.Pow(10, Math.Abs(exp));
+        var factor = BigInteger.Pow(10, Math.Abs(exp));
 
         if (exp < 0)
           result /= factor;
@@ -78,7 +90,8 @@ namespace HigherArithmetics.Numerics {
       return true;
     }
 
-    private static bool TryParseNatural(string value, out BigRational result) {
+    private static bool TryParseNatural(string? value, NumberStyles styles, IFormatProvider? formatProvider,
+        out BigRational result) {
       result = NaN;
 
       if (string.IsNullOrWhiteSpace(value))
@@ -91,40 +104,135 @@ namespace HigherArithmetics.Numerics {
 
         return true;
       }
-      else if ("+Inf".Equals(value, StringComparison.OrdinalIgnoreCase)) {
+
+      if ("+Inf".Equals(value, StringComparison.OrdinalIgnoreCase)) {
         result = PositiveInfinity;
 
         return true;
       }
-      else if ("-Inf".Equals(value, StringComparison.OrdinalIgnoreCase)) {
+
+      if ("-Inf".Equals(value, StringComparison.OrdinalIgnoreCase)) {
         result = NegativeInfinity;
 
         return true;
       }
 
-      string[] parts = value.Split(new char[] { '/', '\\', ':' });
+      var parts = value.Split('/', '\\', ':');
 
       if (parts.Length > 2)
         return false;
 
       if (parts.Length == 1) {
-        if (BigInteger.TryParse(value, out BigInteger v)) {
+        if (BigInteger.TryParse(value, styles, formatProvider, out var v)) {
           result = new BigRational(v);
 
           return true;
         }
-        else
-          return false;
+
+        return false;
       }
 
-      if (BigInteger.TryParse(parts[0], out BigInteger a) &&
-          BigInteger.TryParse(parts[1], out BigInteger b)) {
+      if (BigInteger.TryParse(parts[0], styles, formatProvider, out var a) &&
+          BigInteger.TryParse(parts[1], styles, formatProvider, out var b)) {
         result = new BigRational(a, b);
 
         return true;
       }
 
       return false;
+    }
+
+    private static bool TryCast(object? value, out BigRational result) {
+      result = NaN;
+
+      if (value is null)
+        return false;
+
+      if (value is BigRational exact) {
+        result = exact;
+
+        return true;
+      }
+
+      if (value is bool flag) {
+        result = flag ? One : Zero;
+
+        return true;
+      }
+
+      if (value is sbyte i8) {
+        result = i8;
+
+        return true;
+      }
+
+      if (value is short i16) {
+        result = i16;
+
+        return true;
+      }
+
+      if (value is int i32) {
+        result = i32;
+
+        return true;
+      }
+
+      if (value is int i64) {
+        result = i64;
+
+        return true;
+      }
+
+      if (value is byte ui8) {
+        result = ui8;
+
+        return true;
+      }
+
+      if (value is ushort ui16) {
+        result = ui16;
+
+        return true;
+      }
+
+      if (value is uint ui32) {
+        result = ui32;
+
+        return true;
+      }
+
+      if (value is uint ui64) {
+        result = ui64;
+
+        return true;
+      }
+
+      if (value is BigInteger bi) {
+        result = bi;
+
+        return true;
+      }
+
+      if (value is float fp32) {
+        result = fp32;
+
+        return true;
+      }
+
+      if (value is float fp64) {
+        result = fp64;
+
+        return true;
+      }
+
+      if (value is decimal deValue) {
+        result = deValue;
+
+        return true;
+      }
+
+      return TryParse(value.ToString(), out result);
     }
 
     #endregion Create Algorithm
@@ -136,8 +244,8 @@ namespace HigherArithmetics.Numerics {
       if (info is null)
         throw new ArgumentNullException(nameof(info));
 
-      var numerator = BigInteger.Parse(info.GetString("Numerator"));
-      var denominator = BigInteger.Parse(info.GetString("Denominator"));
+      var numerator = BigInteger.Parse(info.GetString("Numerator") ?? "");
+      var denominator = BigInteger.Parse(info.GetString("Denominator") ?? "");
 
       if (numerator < 0 && denominator < 0) {
         numerator = -numerator;
@@ -168,11 +276,10 @@ namespace HigherArithmetics.Numerics {
         Numerator = numerator / gcd;
         Denominator = denominator / gcd;
       }
-
     }
 
     /// <summary>
-    /// Standard rational constructor
+    ///     Standard rational constructor
     /// </summary>
     /// <param name="numerator">numerator</param>
     /// <param name="denominator">denominator</param>
@@ -209,25 +316,36 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// Standard rational constuctor (from integer)
+    ///     Standard rational constructor
     /// </summary>
-    /// <param name="value">integer value</param>
-    public BigRational(BigInteger value) : this(value, 1) { }
+    /// <param name="pair">tuple with numerator and denominator</param>
+    public BigRational((BigInteger numerator, BigInteger denominator) pair)
+        : this(pair.numerator, pair.denominator) {
+    }
 
     /// <summary>
-    /// Standard rational constuctor (from integer)
+    ///     Standard rational constructor (from integer)
     /// </summary>
     /// <param name="value">integer value</param>
-    public BigRational(int value) : this((BigInteger)value, 1) { }
+    public BigRational(BigInteger value) : this(value, 1) {
+    }
 
     /// <summary>
-    /// Standard rational constuctor (from integer)
+    ///     Standard rational constructor (from integer)
     /// </summary>
     /// <param name="value">integer value</param>
-    public BigRational(long value) : this((BigInteger)value, 1) { }
+    public BigRational(int value) : this(value, 1) {
+    }
 
     /// <summary>
-    /// From character numeric value ⅝ => 5 / 8
+    ///     Standard rational constructor (from integer)
+    /// </summary>
+    /// <param name="value">integer value</param>
+    public BigRational(long value) : this(value, 1) {
+    }
+
+    /// <summary>
+    ///     From character numeric value ⅝ => 5 / 8
     /// </summary>
     public BigRational(char value) {
       if (value == '∞') {
@@ -256,7 +374,7 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// From Decimal value
+    ///     From Decimal value
     /// </summary>
     /// <param name="value">Decimal value</param>
     public BigRational(decimal value) {
@@ -277,7 +395,7 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// From Float value
+    ///     From Float value
     /// </summary>
     /// <param name="value">Float value</param>
     public BigRational(float value) {
@@ -315,16 +433,16 @@ namespace HigherArithmetics.Numerics {
 
       bits[3] = (byte)((bits[3] | 0x80) ^ 0x80);
 
-      int exp = ((((int)(bits[3])) << 1) | (bits[2] >> 7)) - 127;
+      int exp = ((bits[3] << 1) | (bits[2] >> 7)) - 127;
 
-      BigInteger mantissa = (bits[2] | 128);
+      BigInteger mantissa = bits[2] | 128;
 
       mantissa <<= 16;
 
       for (int i = 1; i >= 0; --i) {
         int item = bits[i];
 
-        BigInteger term = ((BigInteger)item) << (i * 8);
+        BigInteger term = (BigInteger)item << (i * 8);
 
         mantissa += term; //((BigInteger)item) << (i * 8);
       }
@@ -348,7 +466,7 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// From Double value
+    ///     From Double value
     /// </summary>
     /// <param name="value">Double value</param>
     public BigRational(double value) {
@@ -386,7 +504,7 @@ namespace HigherArithmetics.Numerics {
 
       bits[7] = (byte)((bits[7] | 0x80) ^ 0x80);
 
-      int exp = ((((int)(bits[7])) << 4) | (bits[6] >> 4)) - 1023;
+      int exp = ((bits[7] << 4) | (bits[6] >> 4)) - 1023;
 
       BigInteger mantissa = (bits[6] & 0xF) + 16;
 
@@ -395,7 +513,7 @@ namespace HigherArithmetics.Numerics {
       for (int i = 5; i >= 0; --i) {
         int item = bits[i];
 
-        mantissa += ((BigInteger)item) << (i * 8);
+        mantissa += (BigInteger)item << (i * 8);
       }
 
       mantissa *= sign;
@@ -417,21 +535,17 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// Try Parse (either natural, like "23 / 97" or decimal like "-1.45(913)e-6")
+    ///     Deconstruction into tuple
     /// </summary>
-    public static bool TryParse(string value, out BigRational result) {
-      if (TryParseNatural(value, out result))
-        return true;
-      if (TryParseDecimal(value, out result))
-        return true;
-
-      result = NaN;
-
-      return false;
+    /// <param name="numerator">Numerator</param>
+    /// <param name="denominator">Denominator</param>
+    public void Deconstruct(out BigInteger numerator, out BigInteger denominator) {
+      numerator = Numerator;
+      denominator = Denominator;
     }
 
     /// <summary>
-    /// From Continued Fraction
+    ///     From Continued Fraction
     /// </summary>
     /// <param name="terms"></param>
     /// <returns></returns>
@@ -439,19 +553,19 @@ namespace HigherArithmetics.Numerics {
       if (terms is null)
         throw new ArgumentNullException(nameof(terms));
 
-      BigRational result = BigRational.PositiveInfinity;
+      BigRational result = PositiveInfinity;
 
       foreach (BigInteger term in terms.Reverse())
-        result = (term + 1 / result);
+        result = term + 1 / result;
 
       return result;
     }
 
     /// <summary>
-    /// From radix representation
-    /// E.g. -3.26A0FF4 (Hex)
+    ///     From radix representation
+    ///     E.g. -3.26A0FF4 (Hex)
     /// </summary>
-    /// <param name="value">Value in int.frac format</param>
+    /// <param name="value">Value in int.fractional format</param>
     /// <param name="radix">Radix to use</param>
     public static BigRational FromRadix(IEnumerable<char> value, int radix) {
       if (value is null)
@@ -461,11 +575,11 @@ namespace HigherArithmetics.Numerics {
         throw new ArgumentOutOfRangeException(nameof(radix));
 
       static int DigitFromChar(char c) {
-        if (c >= '0' && c <= '9')
+        if ((c >= '0') & (c <= '9'))
           return c - '0';
-        if (c >= 'a' && c <= 'z')
+        if ((c >= 'a') & (c <= 'z'))
           return c - 'a' + 10;
-        if (c >= 'A' && c <= 'Z')
+        if ((c >= 'A') & (c <= 'Z'))
           return c - 'A' + 10;
 
         return -1;
@@ -478,9 +592,9 @@ namespace HigherArithmetics.Numerics {
       BigInteger nom = 0;
       BigInteger den = 1;
 
-      bool isFrac = false;
+      bool isFractional = false;
 
-      foreach (char c in value) {
+      foreach (var c in value) {
         if (char.IsWhiteSpace(c) || c == '_')
           continue;
 
@@ -496,15 +610,15 @@ namespace HigherArithmetics.Numerics {
         first = false;
 
         if (c == ',' || c == '.') {
-          if (isFrac)
+          if (isFractional)
             throw new FormatException("Invalid Rational Value Format");
 
-          isFrac = true;
+          isFractional = true;
 
           continue;
         }
 
-        if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
+        if ((c >= '0') & (c <= '9') || (c >= 'a') & (c <= 'z') || (c >= 'A') & (c <= 'Z')) {
           int d = DigitFromChar(c);
 
           if (d < 0 || d >= radix)
@@ -512,50 +626,44 @@ namespace HigherArithmetics.Numerics {
 
           nom = nom * radix + d;
 
-          if (isFrac)
+          if (isFractional)
             den *= radix;
         }
-        else
+        else {
           throw new FormatException("Invalid Rational Value Format");
+        }
       }
 
       return new BigRational(nom * sign, den);
     }
 
     /// <summary>
-    /// Parse
-    /// </summary>
-    public static BigRational Parse(string value) => TryParse(value, out var result)
-      ? result
-      : throw new FormatException("Not a valid fraction");
-
-    /// <summary>
-    /// Zero
+    ///     Zero
     /// </summary>
     public static BigRational Zero => new(0, 1);
 
     /// <summary>
-    /// One
+    ///     One
     /// </summary>
     public static BigRational One => new(1, 1);
 
     /// <summary>
-    /// Minus One
+    ///     Minus One
     /// </summary>
     public static BigRational MinusOne => new(-1, 1);
 
     /// <summary>
-    /// NaN
+    ///     NaN
     /// </summary>
     public static BigRational NaN => new(0, 0);
 
     /// <summary>
-    /// Positive infinity
+    ///     Positive infinity
     /// </summary>
     public static BigRational PositiveInfinity => new(1, 0);
 
     /// <summary>
-    /// Negative infinity
+    ///     Negative infinity
     /// </summary>
     public static BigRational NegativeInfinity => new(-1, 0);
 
@@ -564,12 +672,12 @@ namespace HigherArithmetics.Numerics {
     #region Public
 
     /// <summary>
-    /// Farey sequence
+    ///     Farey sequence
     /// </summary>
-    /// <see cref="https://en.wikipedia.org/wiki/Farey_sequence"/>
+    // see https://en.wikipedia.org/wiki/Farey_sequence" 
     public static IEnumerable<BigRational> Farey(BigInteger n) {
       if (n <= 0)
-        throw new ArgumentOutOfRangeException(nameof(n), $"{nameof(n)} must be positive");
+        throw new ArgumentOutOfRangeException(nameof(n), "Parameter must be a positive value");
 
       BigInteger a = 0;
       BigInteger b = 1;
@@ -601,43 +709,44 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// Compare
+    ///     Compare
     /// </summary>
     public static int Compare(BigRational left, BigRational right) {
       var value = left.Numerator * right.Denominator - left.Denominator * right.Numerator;
 
-      if (value < 0)
-        return -1;
-      else if (value > 0)
-        return 1;
-      else
-        return 0;
+      return value < 0
+          ? -1
+          : value > 0
+              ? +1
+              : 0;
     }
 
     /// <summary>
-    /// Min
+    ///     Min
     /// </summary>
-    public static BigRational Min(BigRational left, BigRational right) =>
-      left <= right ? left : right;
+    public static BigRational Min(BigRational left, BigRational right) {
+      return left <= right ? left : right;
+    }
 
     /// <summary>
-    /// Max
+    ///     Max
     /// </summary>
-    public static BigRational Max(BigRational left, BigRational right) =>
-      left >= right ? left : right;
+    public static BigRational Max(BigRational left, BigRational right) {
+      return left >= right ? left : right;
+    }
 
     /// <summary>
-    /// Numerator
+    ///     Numerator
     /// </summary>
     public BigInteger Numerator { get; }
 
     /// <summary>
-    /// Denominator
+    ///     Denominator
     /// </summary>
     public BigInteger Denominator { get; }
 
     /// <summary>
-    /// Parity
+    ///     Parity
     /// </summary>
     public Parity Parity {
       get {
@@ -649,72 +758,76 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// Is NaN
+    ///     Is NaN
     /// </summary>
     public bool IsNaN => Numerator == 0 && Denominator == 0;
 
     /// <summary>
-    /// Is Infinity (either positive or negative)
+    ///     Is Infinity (either positive or negative)
     /// </summary>
     public bool IsInfinity => Numerator != 0 && Denominator == 0;
 
     /// <summary>
-    /// Is Positive Infinity 
+    ///     Is Positive Infinity
     /// </summary>
     public bool IsPositiveInfinity => Numerator > 0 && Denominator == 0;
 
     /// <summary>
-    /// Is Negative Infinity 
+    ///     Is Negative Infinity
     /// </summary>
     public bool IsNegativeInfinity => Numerator < 0 && Denominator == 0;
 
     /// <summary>
-    /// Is Finite (not NaN and not Infinity)
+    ///     Is Finite (not NaN and not Infinity)
     /// </summary>
     public bool IsFinite => Denominator != 0;
 
     /// <summary>
-    /// Is One (1)
+    ///     Is One (1)
     /// </summary>
     public bool IsOne => Numerator.IsOne && Denominator.IsOne;
 
     /// <summary>
-    /// Is Zero (0)
+    ///     Is Zero (0)
     /// </summary>
     public bool IsZero => Numerator.IsZero && Denominator.IsOne;
 
     /// <summary>
-    /// Is Power Of Two
+    ///     Is Power Of Two
     /// </summary>
-    public bool IsPowerOfTwo => Numerator.IsOne && Denominator.IsPowerOfTwo ||
-                                Numerator.IsPowerOfTwo && Denominator.IsOne;
+    public bool IsPowerOfTwo => (Numerator.IsOne && Denominator.IsPowerOfTwo) ||
+                                (Numerator.IsPowerOfTwo && Denominator.IsOne);
 
     /// <summary>
-    /// Is Integer (no fractional part)
+    ///     Is Integer (no fractional part)
     /// </summary>
     public bool IsInteger => Denominator == 1;
 
     /// <summary>
-    /// Is Proper Fraction
+    ///     Is Proper Fraction
     /// </summary>
     public bool IsProperFraction => BigInteger.Abs(Numerator) < BigInteger.Abs(Denominator);
 
     /// <summary>
-    /// Absolute Value 
+    ///     Absolute Value
     /// </summary>
-    public BigRational Abs() => Numerator < 0
-      ? new BigRational(-Numerator, Denominator)
-      : this;
+    public BigRational Abs() {
+      return Numerator < 0
+          ? new BigRational(-Numerator, Denominator)
+          : this;
+    }
 
     /// <summary>
-    /// Sign (-1, +1, 0)
+    ///     Sign (-1, +1, 0)
     /// </summary>
-    public int Sign() => Numerator > 0 ? 1
-                       : Numerator < 0 ? -1
-                       : 0;
+    public int Sign() {
+      return Numerator > 0 ? 1
+          : Numerator < 0 ? -1
+          : 0;
+    }
 
     /// <summary>
-    /// Clamp
+    ///     Clamp
     /// </summary>
     /// <param name="min">Minimum Border</param>
     /// <param name="max">Maximum Border</param>
@@ -726,41 +839,39 @@ namespace HigherArithmetics.Numerics {
         return this;
 
       return this < min ? min
-           : this > max ? max
-           : this;
+          : this > max ? max
+          : this;
     }
 
     /// <summary>
-    /// Power
+    ///     Power
     /// </summary>
     public BigRational Pow(int exponent) {
       if (Denominator == 0)
         return this;
-      else if (0 == exponent)
+      if (0 == exponent)
         return One;
-      else if (0 == Numerator)
+      if (0 == Numerator)
         return Zero;
 
       if (exponent > 0)
         return new BigRational(BigInteger.Pow(Numerator, exponent), BigInteger.Pow(Denominator, exponent));
-      else if (exponent == int.MinValue)
+      if (exponent == int.MinValue)
         throw new ArgumentOutOfRangeException(nameof(exponent));
-      else
-        return new BigRational(BigInteger.Pow(Denominator, -exponent), BigInteger.Pow(Numerator, -exponent));
+      return new BigRational(BigInteger.Pow(Denominator, -exponent), BigInteger.Pow(Numerator, -exponent));
     }
 
     /// <summary>
-    /// Log10
+    ///     Log10
     /// </summary>
     public double Log10() {
       if (Numerator < 0)
         return double.NaN;
-      if (Denominator == 0) {
-        if (Numerator > 0)
-          return double.PositiveInfinity;
+      if (Denominator == 0)
+        return Numerator > 0
+            ? double.PositiveInfinity
+            : double.NaN;
 
-        return double.NaN;
-      }
       if (Numerator == 0)
         return double.NegativeInfinity;
 
@@ -768,17 +879,16 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// Log (natural)
+    ///     Log (natural)
     /// </summary>
     public double Log() {
       if (Numerator < 0)
         return double.NaN;
-      if (Denominator == 0) {
-        if (Numerator > 0)
-          return double.PositiveInfinity;
+      if (Denominator == 0)
+        return Numerator > 0
+            ? double.PositiveInfinity
+            : double.NaN;
 
-        return double.NaN;
-      }
       if (Numerator == 0)
         return double.NegativeInfinity;
 
@@ -786,7 +896,7 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// Log 
+    ///     Log
     /// </summary>
     public double Log(double baseValue) {
       if (Numerator < 0)
@@ -797,6 +907,7 @@ namespace HigherArithmetics.Numerics {
 
         return double.NaN;
       }
+
       if (Numerator == 0)
         return double.NegativeInfinity;
 
@@ -804,21 +915,25 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// Truncate (integer part) 
+    ///     Truncate (integer part)
     /// </summary>
-    public BigRational Trunc() => Denominator == 0
-      ? this
-      : new BigRational(Numerator / Denominator, 1);
+    public BigRational Trunc() {
+      return Denominator == 0
+          ? this
+          : new BigRational(Numerator / Denominator, 1);
+    }
 
     /// <summary>
-    /// Fractional part  
+    ///     Fractional part
     /// </summary>
-    public BigRational Frac() => Denominator == 0
-      ? this
-      : new BigRational(Numerator % Denominator, Denominator);
+    public BigRational Frac() {
+      return Denominator == 0
+          ? this
+          : new BigRational(Numerator % Denominator, Denominator);
+    }
 
     /// <summary>
-    /// Floor
+    ///     Floor
     /// </summary>
     public BigRational Floor() {
       if (Denominator == 0)
@@ -831,7 +946,7 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// Ceiling
+    ///     Ceiling
     /// </summary>
     public BigRational Ceiling() {
       if (Denominator == 0)
@@ -844,75 +959,83 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// Round
+    ///     Round
     /// </summary>
     public BigRational Round(MidpointRounding mode) {
       if (Denominator == 0)
         return this;
 
-      BigInteger integer = Numerator / Denominator;
-      BigInteger frac = 2 * ((Numerator < 0 ? -Numerator : Numerator) % Denominator);
+      var integer = Numerator / Denominator;
+      var fractional = 2 * ((Numerator < 0 ? -Numerator : Numerator) % Denominator);
 
-      int sign = Numerator < 0 ? -1 : 1;
+      var sign = Numerator < 0 ? -1 : 1;
 
-      if (frac < Denominator)
+      if (fractional < Denominator)
         return integer;
-      else if (frac > Denominator)
+      if (fractional > Denominator)
         return sign < 0 ? integer - 1 : integer + 1;
 
-      if (mode == MidpointRounding.AwayFromZero)
-        return sign < 0 ? integer - 1 : integer + 1;
-      else if (mode == MidpointRounding.ToZero)
-        return integer;
-      else if (mode == MidpointRounding.ToNegativeInfinity)
-        return integer - 1;
-      else if (mode == MidpointRounding.ToPositiveInfinity)
-        return integer + 1;
+      switch (mode) {
+        case MidpointRounding.AwayFromZero:
+          return sign < 0 ? integer - 1 : integer + 1;
+        case MidpointRounding.ToZero:
+          return integer;
+        case MidpointRounding.ToNegativeInfinity:
+          return integer - 1;
+        case MidpointRounding.ToPositiveInfinity:
+          return integer + 1;
+        case MidpointRounding.ToEven:
+        default: {
+            if (integer % 2 == 0)
+              return integer;
 
-      if (integer % 2 == 0)
-        return integer;
-      else
-        return sign < 0 ? integer - 1 : integer + 1;
+            return sign < 0 ? integer - 1 : integer + 1;
+          }
+      }
     }
 
     /// <summary>
-    /// Integer Division 
+    ///     Integer Division
     /// </summary>
-    public BigInteger Div(BigRational value) =>
-      (Numerator * value.Denominator) / (value.Numerator * Denominator);
+    public BigInteger Div(BigRational value) {
+      return Numerator * value.Denominator / (value.Numerator * Denominator);
+    }
 
     /// <summary>
-    /// Remainder
+    ///     Remainder
     /// </summary>
-    public BigRational Rem(BigRational value) =>
-      new((Numerator * value.Denominator) % (value.Numerator * Denominator),
-            Denominator * value.Denominator);
+    public BigRational Rem(BigRational value) {
+      return new(Numerator * value.Denominator % (value.Numerator * Denominator),
+          Denominator * value.Denominator);
+    }
 
     /// <summary>
-    /// Round
+    ///     Round
     /// </summary>
-    public BigRational Round() => Round(MidpointRounding.ToEven);
+    public BigRational Round() {
+      return Round(MidpointRounding.ToEven);
+    }
 
     /// <summary>
-    /// Fractional digits
-    /// e.g. 1/7 returns 1, 4, 2, 8, 5, 7, 1, 4, 2 ...
+    ///     Fractional digits
+    ///     e.g. 1/7 returns 1, 4, 2, 8, 5, 7, 1, 4, 2 ...
     /// </summary>
     public IEnumerable<int> FractionalDigits() {
       if (Denominator <= 1)
         yield break;
 
-      for (BigInteger value = ((Numerator < 0 ? -Numerator : Numerator) % Denominator) * 10;
+      for (var value = (Numerator < 0 ? -Numerator : Numerator) % Denominator * 10;
            value != 0;
-           value = (value % Denominator) * 10)
+           value = value % Denominator * 10)
         yield return (int)(value / Denominator);
     }
 
     /// <summary>
-    /// To Continued Fraction 
+    ///     To Continued Fraction
     /// </summary>
     public IEnumerable<BigInteger> ToContinuedFraction() {
-      BigInteger num = Numerator;
-      BigInteger den = Denominator;
+      var num = Numerator;
+      var den = Denominator;
 
       while (den != 0) {
         yield return BigInteger.DivRem(num, den, out num);
@@ -922,7 +1045,7 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// To radix representation (eg. binary, hexadecimal etc.)
+    ///     To radix representation (eg. binary, hexadecimal etc.)
     /// </summary>
     /// <param name="radix">Radix in [2..36] range</param>
     /// <returns></returns>
@@ -934,9 +1057,11 @@ namespace HigherArithmetics.Numerics {
         foreach (char c in ToString())
           yield return c;
 
-      static char DigitToChar(int v) => (char)(v < 10 ? '0' + v : 'a' + v - 10);
+      static char DigitToChar(int v) {
+        return (char)(v < 10 ? '0' + v : 'a' + v - 10);
+      }
 
-      BigRational value = this;
+      var value = this;
 
       if (value < 0) {
         yield return '-';
@@ -944,10 +1069,11 @@ namespace HigherArithmetics.Numerics {
         value = -value;
       }
 
-      BigInteger intPart = value.Numerator / value.Denominator;
+      var intPart = value.Numerator / value.Denominator;
 
-      if (intPart == 0)
+      if (intPart == 0) {
         yield return '0';
+      }
       else {
         Stack<char> digits = new();
 
@@ -958,19 +1084,19 @@ namespace HigherArithmetics.Numerics {
           yield return digits.Pop();
       }
 
-      BigRational fracPart = value.Frac();
+      var fractionalPart = value.Frac();
 
-      if (fracPart == 0)
+      if (fractionalPart == 0)
         yield break;
 
       yield return '.';
 
-      while (fracPart > 0) {
-        fracPart *= radix;
+      while (fractionalPart > 0) {
+        fractionalPart *= radix;
 
-        yield return DigitToChar((int)(fracPart.Numerator / fracPart.Denominator));
+        yield return DigitToChar((int)(fractionalPart.Numerator / fractionalPart.Denominator));
 
-        fracPart = fracPart.Frac();
+        fractionalPart = fractionalPart.Frac();
       }
     }
 
@@ -978,32 +1104,55 @@ namespace HigherArithmetics.Numerics {
 
     #region Operators
 
-    #region Cast 
+    #region Cast
 
     /// <summary>
-    /// From Character Numeric Value
+    ///     From (numerator, denominator) tuple
     /// </summary>
-    public static implicit operator BigRational(char value) => new(value);
+    /// <param name="pair">Tuple</param>
+    public static implicit operator BigRational((BigInteger numerator, BigInteger denominator) pair) {
+      return new(pair);
+    }
 
     /// <summary>
-    /// From Integer
+    ///     To (numerator, denominator) tuple
     /// </summary>
-    public static implicit operator BigRational(BigInteger value) => new(value);
+    public static implicit operator (BigInteger numerator, BigInteger denominator)(BigRational value) {
+      return (value.Numerator, value.Denominator);
+    }
 
     /// <summary>
-    /// To Integer
+    ///     From Character Numeric Value
     /// </summary>
-    public static explicit operator BigInteger(BigRational value) => value.IsNaN || value.IsInfinity
-      ? throw new OverflowException()
-      : value.Numerator / value.Denominator;
+    public static implicit operator BigRational(char value) {
+      return new(value);
+    }
 
     /// <summary>
-    /// From Integer
+    ///     From Integer
     /// </summary>
-    public static implicit operator BigRational(int value) => new(value, 1);
+    public static implicit operator BigRational(BigInteger value) {
+      return new(value);
+    }
 
     /// <summary>
-    /// To Integer
+    ///     To Integer
+    /// </summary>
+    public static explicit operator BigInteger(BigRational value) {
+      return value.IsNaN || value.IsInfinity
+          ? throw new OverflowException()
+          : value.Numerator / value.Denominator;
+    }
+
+    /// <summary>
+    ///     From Integer
+    /// </summary>
+    public static implicit operator BigRational(int value) {
+      return new(value, 1);
+    }
+
+    /// <summary>
+    ///     To Integer
     /// </summary>
     public static explicit operator int(BigRational value) {
       if (value.IsNaN || value.IsInfinity)
@@ -1018,13 +1167,22 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// From Signed Byte
+    ///     From bool
     /// </summary>
-    [CLSCompliant(false)]
-    public static implicit operator BigRational(sbyte value) => new(value, 1);
+    public static explicit operator BigRational(bool value) {
+      return value ? One : Zero;
+    }
 
     /// <summary>
-    /// To Signed Byte
+    ///     From Signed Byte
+    /// </summary>
+    [CLSCompliant(false)]
+    public static implicit operator BigRational(sbyte value) {
+      return new(value, 1);
+    }
+
+    /// <summary>
+    ///     To Signed Byte
     /// </summary>
     [CLSCompliant(false)]
     public static explicit operator sbyte(BigRational value) {
@@ -1040,12 +1198,14 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// From Byte
+    ///     From Byte
     /// </summary>
-    public static implicit operator BigRational(byte value) => new(value, 1);
+    public static implicit operator BigRational(byte value) {
+      return new(value, 1);
+    }
 
     /// <summary>
-    /// To Byte
+    ///     To Byte
     /// </summary>
     public static explicit operator byte(BigRational value) {
       if (value.IsNaN || value.IsInfinity)
@@ -1060,12 +1220,14 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// From Short
+    ///     From Short
     /// </summary>
-    public static implicit operator BigRational(short value) => new(value, 1);
+    public static implicit operator BigRational(short value) {
+      return new(value, 1);
+    }
 
     /// <summary>
-    /// To Short
+    ///     To Short
     /// </summary>
     public static explicit operator short(BigRational value) {
       if (value.IsNaN || value.IsInfinity)
@@ -1080,13 +1242,15 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// From UInt16
+    ///     From UInt16
     /// </summary>
     [CLSCompliant(false)]
-    public static implicit operator BigRational(ushort value) => new(value, 1);
+    public static implicit operator BigRational(ushort value) {
+      return new(value, 1);
+    }
 
     /// <summary>
-    /// To UInt16
+    ///     To UInt16
     /// </summary>
     [CLSCompliant(false)]
     public static explicit operator ushort(BigRational value) {
@@ -1098,17 +1262,19 @@ namespace HigherArithmetics.Numerics {
       if (result < ushort.MinValue || result > ushort.MaxValue)
         throw new OverflowException();
 
-      return (UInt16)result;
+      return (ushort)result;
     }
 
     /// <summary>
-    /// From UInt32
+    ///     From UInt32
     /// </summary>
     [CLSCompliant(false)]
-    public static implicit operator BigRational(uint value) => new(value, 1);
+    public static implicit operator BigRational(uint value) {
+      return new(value, 1);
+    }
 
     /// <summary>
-    /// To UInt32
+    ///     To UInt32
     /// </summary>
     [CLSCompliant(false)]
     public static explicit operator uint(BigRational value) {
@@ -1124,13 +1290,15 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// From UInt64
+    ///     From UInt64
     /// </summary>
     [CLSCompliant(false)]
-    public static implicit operator BigRational(ulong value) => new(value, 1);
+    public static implicit operator BigRational(ulong value) {
+      return new(value, 1);
+    }
 
     /// <summary>
-    /// To UInt64
+    ///     To UInt64
     /// </summary>
     [CLSCompliant(false)]
     public static explicit operator ulong(BigRational value) {
@@ -1146,12 +1314,14 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// From Integer
+    ///     From Integer
     /// </summary>
-    public static implicit operator BigRational(long value) => new(value, 1);
+    public static implicit operator BigRational(long value) {
+      return new(value, 1);
+    }
 
     /// <summary>
-    /// To Integer
+    ///     To Integer
     /// </summary>
     public static explicit operator long(BigRational value) {
       if (value.IsNaN || value.IsInfinity)
@@ -1166,12 +1336,14 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// From Decimal
+    ///     From Decimal
     /// </summary>
-    public static implicit operator BigRational(decimal value) => new(value);
+    public static implicit operator BigRational(decimal value) {
+      return new(value);
+    }
 
     /// <summary>
-    /// To Decimal
+    ///     To Decimal
     /// </summary>
     public static explicit operator decimal(BigRational value) {
       if (!value.IsFinite)
@@ -1187,9 +1359,9 @@ namespace HigherArithmetics.Numerics {
       BigRational mantissa = value.Abs();
 
       var data = mantissa
-        .ToRadix(10)
-        .Select(c => c - '0')
-        .Take(30);
+          .ToRadix(10)
+          .Select(c => c - '0')
+          .Take(30);
 
       BigInteger m = 0;
       bool flag = false;
@@ -1226,12 +1398,14 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// From Float (Single)
+    ///     From Float (Single)
     /// </summary>
-    public static implicit operator BigRational(float value) => new(value);
+    public static implicit operator BigRational(float value) {
+      return new(value);
+    }
 
     /// <summary>
-    /// To Float (Single)
+    ///     To Float (Single)
     /// </summary>
     public static explicit operator float(BigRational value) {
       if (value.IsNaN)
@@ -1243,7 +1417,7 @@ namespace HigherArithmetics.Numerics {
       if (value == 0)
         return 0;
       if (value.IsInteger)
-        return (float)(value.Numerator);
+        return (float)value.Numerator;
 
       long exp = value.Numerator.GetBitLength() - value.Denominator.GetBitLength();
 
@@ -1253,16 +1427,16 @@ namespace HigherArithmetics.Numerics {
       int e = (int)exp;
 
       BigRational mantissa = e >= 0
-        ? value.Abs() / BigInteger.Pow(2, e)
-        : value.Abs() * BigInteger.Pow(2, -e);
+          ? value.Abs() / BigInteger.Pow(2, e)
+          : value.Abs() * BigInteger.Pow(2, -e);
 
       long m = mantissa
-        .ToRadix(2)
-        .Where(c => c == '1' || c == '0')
-        .Select(c => c - '0')
-        .Concat(new int[24])
-        .Take(25)
-        .Aggregate(0L, (s, a) => s * 2 + a);
+          .ToRadix(2)
+          .Where(c => c == '1' || c == '0')
+          .Select(c => c - '0')
+          .Concat(new int[24])
+          .Take(25)
+          .Aggregate(0L, (s, a) => s * 2 + a);
 
       if (value < 0)
         m = -m;
@@ -1278,12 +1452,14 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// From Double
+    ///     From Double
     /// </summary>
-    public static implicit operator BigRational(double value) => new(value);
+    public static implicit operator BigRational(double value) {
+      return new(value);
+    }
 
     /// <summary>
-    /// To Double
+    ///     To Double
     /// </summary>
     public static explicit operator double(BigRational value) {
       if (value.IsNaN)
@@ -1295,7 +1471,7 @@ namespace HigherArithmetics.Numerics {
       if (value == 0)
         return 0;
       if (value.IsInteger)
-        return (double)(value.Numerator);
+        return (double)value.Numerator;
 
       long exp = value.Numerator.GetBitLength() - value.Denominator.GetBitLength();
 
@@ -1305,16 +1481,16 @@ namespace HigherArithmetics.Numerics {
       int e = (int)exp;
 
       BigRational mantissa = e >= 0
-        ? value.Abs() / BigInteger.Pow(2, e)
-        : value.Abs() * BigInteger.Pow(2, -e);
+          ? value.Abs() / BigInteger.Pow(2, e)
+          : value.Abs() * BigInteger.Pow(2, -e);
 
       long m = mantissa
-        .ToRadix(2)
-        .Where(c => c == '1' || c == '0')
-        .Select(c => c - '0')
-        .Concat(new int[52])
-        .Take(53)
-        .Aggregate(0L, (s, a) => s * 2 + a);
+          .ToRadix(2)
+          .Where(c => c == '1' || c == '0')
+          .Select(c => c - '0')
+          .Concat(new int[52])
+          .Take(53)
+          .Aggregate(0L, (s, a) => s * 2 + a);
 
       if (value < 0)
         m = -m;
@@ -1334,79 +1510,116 @@ namespace HigherArithmetics.Numerics {
     #region Comparison
 
     /// <summary>
-    /// Equals
+    ///     Equals
     /// </summary>
-    public static bool operator ==(BigRational left, BigRational right) => left.Equals(right);
+    public static bool operator ==(BigRational left, BigRational right) {
+      return left.Equals(right);
+    }
 
     /// <summary>
-    /// Not Equals 
+    ///     Not Equals
     /// </summary>
-    public static bool operator !=(BigRational left, BigRational right) => !left.Equals(right);
+    public static bool operator !=(BigRational left, BigRational right) {
+      return !left.Equals(right);
+    }
 
     /// <summary>
-    /// More
+    ///     More
     /// </summary>
-    public static bool operator >(BigRational left, BigRational right) => Compare(left, right) > 0;
+    public static bool operator >(BigRational left, BigRational right) {
+      return Compare(left, right) > 0;
+    }
 
     /// <summary>
-    /// Less
+    ///     Less
     /// </summary>
-    public static bool operator <(BigRational left, BigRational right) => Compare(left, right) < 0;
+    public static bool operator <(BigRational left, BigRational right) {
+      return Compare(left, right) < 0;
+    }
 
     /// <summary>
-    /// More or Equal
+    ///     More or Equal
     /// </summary>
-    public static bool operator >=(BigRational left, BigRational right) => Compare(left, right) >= 0;
+    public static bool operator >=(BigRational left, BigRational right) {
+      return Compare(left, right) >= 0;
+    }
 
     /// <summary>
-    /// Less or Equal
+    ///     Less or Equal
     /// </summary>
-    public static bool operator <=(BigRational left, BigRational right) => Compare(left, right) <= 0;
+    public static bool operator <=(BigRational left, BigRational right) {
+      return Compare(left, right) <= 0;
+    }
 
     #endregion Comparison
 
     #region Arithmetics
 
     /// <summary>
-    /// Unary +
+    ///     Unary +
     /// </summary>
-    public static BigRational operator +(BigRational value) => value;
+    public static BigRational operator +(BigRational value) {
+      return value;
+    }
 
     /// <summary>
-    /// Unary -
+    ///     Unary -
     /// </summary>
-    public static BigRational operator -(BigRational value) => new(-value.Numerator, value.Denominator);
+    public static BigRational operator -(BigRational value) {
+      return new(-value.Numerator, value.Denominator);
+    }
 
     /// <summary>
-    /// Binary +
+    ///     Increment
     /// </summary>
-    public static BigRational operator +(BigRational left, BigRational right) =>
-      new(left.Numerator * right.Denominator + right.Numerator * left.Denominator, left.Denominator * right.Denominator);
+    public static BigRational operator ++(BigRational value) {
+      return value + 1;
+    }
 
     /// <summary>
-    /// Binary -
+    ///     Decrement
     /// </summary>
-    public static BigRational operator -(BigRational left, BigRational right) =>
-      new(left.Numerator * right.Denominator - right.Numerator * left.Denominator, left.Denominator * right.Denominator);
+    public static BigRational operator --(BigRational value) {
+      return value - 1;
+    }
 
     /// <summary>
-    /// Binary *
+    ///     Binary +
     /// </summary>
-    public static BigRational operator *(BigRational left, BigRational right) =>
-      new(left.Numerator * right.Numerator, left.Denominator * right.Denominator);
+    public static BigRational operator +(BigRational left, BigRational right) {
+      return new(left.Numerator * right.Denominator + right.Numerator * left.Denominator,
+          left.Denominator * right.Denominator);
+    }
 
     /// <summary>
-    /// Binary /
+    ///     Binary -
     /// </summary>
-    public static BigRational operator /(BigRational left, BigRational right) =>
-      new(left.Numerator * right.Denominator, left.Denominator * right.Numerator);
+    public static BigRational operator -(BigRational left, BigRational right) {
+      return new(left.Numerator * right.Denominator - right.Numerator * left.Denominator,
+          left.Denominator * right.Denominator);
+    }
 
     /// <summary>
-    /// Remainder
+    ///     Binary *
     /// </summary>
-    public static BigRational operator %(BigRational left, BigRational right) =>
-      new((left.Numerator * right.Denominator) % (right.Numerator * left.Denominator),
-            left.Denominator * right.Denominator);
+    public static BigRational operator *(BigRational left, BigRational right) {
+      return new(left.Numerator * right.Numerator, left.Denominator * right.Denominator);
+    }
+
+    /// <summary>
+    ///     Binary /
+    /// </summary>
+    public static BigRational operator /(BigRational left, BigRational right) {
+      return new(left.Numerator * right.Denominator, left.Denominator * right.Numerator);
+    }
+
+    /// <summary>
+    ///     Remainder
+    /// </summary>
+    public static BigRational operator %(BigRational left, BigRational right) {
+      return new(left.Numerator * right.Denominator % (right.Numerator * left.Denominator),
+          left.Denominator * right.Denominator);
+    }
 
     #endregion Arithmetics
 
@@ -1415,37 +1628,43 @@ namespace HigherArithmetics.Numerics {
     #region IEquatable<BigRational>
 
     /// <summary>
-    /// Equals
+    ///     Equals
     /// </summary>
-    public bool Equals(BigRational other) =>
-      Numerator == other.Numerator && Denominator == other.Denominator;
+    public bool Equals(BigRational other) {
+      return Numerator == other.Numerator && Denominator == other.Denominator;
+    }
 
     /// <summary>
-    /// Equals
+    ///     Equals
     /// </summary>
-    public override bool Equals(object obj) =>
-      obj is BigInteger other && Equals(other);
+    public override bool Equals(object? obj) {
+      return obj is BigInteger other && Equals(other);
+    }
 
     /// <summary>
-    /// Hash Code
+    ///     Hash Code
     /// </summary>
-    public override int GetHashCode() => Numerator.GetHashCode() ^ Denominator.GetHashCode();
+    public override int GetHashCode() {
+      return Numerator.GetHashCode() ^ Denominator.GetHashCode();
+    }
 
     #endregion IEquatable<BigRational>
 
     #region IComparable<BigRational>
 
     /// <summary>
-    /// CompareTo
+    ///     CompareTo
     /// </summary>
-    public int CompareTo(BigRational other) => Compare(this, other);
+    public int CompareTo(BigRational other) {
+      return Compare(this, other);
+    }
 
     #endregion IComparable<BigRational>
 
     #region ISerializable
 
     /// <summary>
-    /// Serialization
+    ///     Serialization
     /// </summary>
     public void GetObjectData(SerializationInfo info, StreamingContext context) {
       if (info is null)
@@ -1460,7 +1679,7 @@ namespace HigherArithmetics.Numerics {
     #region IFormattable
 
     /// <summary>
-    /// To Natural representation (e.g. "1 / 6")
+    ///     To Natural representation (e.g. "1 / 6")
     /// </summary>
     public string ToStringNatural() {
       if (Denominator == 0)
@@ -1470,16 +1689,16 @@ namespace HigherArithmetics.Numerics {
           return "+Inf";
         else
           return "-Inf";
-      else if (Denominator == 1)
-        return Numerator.ToString();
 
-      return $"{Numerator} / {Denominator}";
+      return Denominator == 1
+          ? Numerator.ToString()
+          : $"{Numerator} / {Denominator}";
     }
 
     /// <summary>
-    /// To Decimal representation (e.g. "0.1(6)")
+    ///     To Decimal representation (e.g. "0.1(6)")
     /// </summary>
-    public string ToStringDecimal(IFormatProvider formatProvider = null) {
+    public string ToStringDecimal(IFormatProvider? formatProvider = default) {
       if (Denominator == 0)
         if (Numerator == 0)
           return "NaN";
@@ -1487,7 +1706,7 @@ namespace HigherArithmetics.Numerics {
           return "+Inf";
         else
           return "-Inf";
-      else if (Denominator == 1)
+      if (Denominator == 1)
         return Numerator.ToString();
 
       formatProvider ??= CultureInfo.CurrentCulture;
@@ -1557,11 +1776,10 @@ namespace HigherArithmetics.Numerics {
       }
 
       return sb.ToString();
-
     }
 
     /// <summary>
-    /// To String
+    ///     To String
     /// </summary>
     public override string ToString() {
       if (Denominator == 0)
@@ -1571,16 +1789,16 @@ namespace HigherArithmetics.Numerics {
           return "+Inf";
         else
           return "-Inf";
-      else if (Denominator == 1)
+      if (Denominator == 1)
         return Numerator.ToString();
 
       return $"{Numerator} / {Denominator}";
     }
 
     /// <summary>
-    /// To String
+    ///     To String
     /// </summary>
-    public string ToString(string format, IFormatProvider formatProvider) {
+    public string ToString(string? format, IFormatProvider? formatProvider) {
       if (string.IsNullOrEmpty(format) || format == "g" || format == "G")
         return ToStringNatural();
       if (format == "n" || format == "N")
@@ -1592,12 +1810,265 @@ namespace HigherArithmetics.Numerics {
     }
 
     /// <summary>
-    /// To String
+    ///     To String
     /// </summary>
-    public string ToString(string format) =>
-      ToString(format, CultureInfo.CurrentCulture);
+    public string ToString(string? format) {
+      return ToString(format, CultureInfo.CurrentCulture);
+    }
 
     #endregion IFormattable
+
+    #region ISpanFormattable
+
+    bool ISpanFormattable.TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format,
+        IFormatProvider? provider) {
+      var result = ToString(format.ToString());
+
+      charsWritten = result.Length;
+
+      if (destination.Length >= charsWritten) {
+        for (int i = 0; i < charsWritten; ++i)
+          destination[i] = result[i];
+
+        return true;
+      }
+
+      return false;
+    }
+
+    #endregion ISpanFormattable
+
+    #region IParsable<BigRational>
+
+    /// <summary>
+    ///     Try Parse (either natural, like "23 / 97" or decimal like "-1.45(913)e-6")
+    /// </summary>
+    public static bool TryParse(string? value, NumberStyles styles, IFormatProvider? formatProvider,
+        out BigRational result) {
+      if (TryParseNatural(value, styles, formatProvider, out result))
+        return true;
+      if (TryParseDecimal(value, styles, formatProvider, out result))
+        return true;
+
+      result = NaN;
+
+      return false;
+    }
+
+    /// <summary>
+    ///     Try Parse (either natural, like "23 / 97" or decimal like "-1.45(913)e-6")
+    /// </summary>
+    public static bool TryParse(string? value, IFormatProvider? formatProvider, out BigRational result) {
+      NumberStyles style = NumberStyles.AllowLeadingSign |
+                           NumberStyles.AllowLeadingWhite |
+                           NumberStyles.AllowThousands |
+                           NumberStyles.AllowTrailingWhite |
+                           NumberStyles.AllowHexSpecifier;
+
+      if (TryParseNatural(value, style, formatProvider, out result))
+        return true;
+      if (TryParseDecimal(value, style, formatProvider, out result))
+        return true;
+
+      result = NaN;
+
+      return false;
+    }
+
+    /// <summary>
+    ///     Try Parse (either natural, like "23 / 97" or decimal like "-1.45(913)e-6")
+    /// </summary>
+    public static bool TryParse(string? value, out BigRational result) {
+      return TryParse(value, default, out result);
+    }
+
+    /// <summary>
+    ///     Parse
+    /// </summary>
+    public static BigRational Parse(string? value, NumberStyles styles, IFormatProvider? formatProvider) {
+      return TryParse(value, styles, formatProvider, out var result)
+          ? result
+          : throw new FormatException("Not a valid fraction");
+    }
+
+    /// <summary>
+    ///     Parse
+    /// </summary>
+    public static BigRational Parse(string? value, IFormatProvider? formatProvider) {
+      return TryParse(value, formatProvider, out var result)
+          ? result
+          : throw new FormatException("Not a valid fraction");
+    }
+
+    /// <summary>
+    ///     Parse
+    /// </summary>
+    public static BigRational Parse(string? value) {
+      return Parse(value, default);
+    }
+
+    #endregion IParsable<BigRational>
+
+    /// <summary>
+    ///     Try Parse (either natural, like "23 / 97" or decimal like "-1.45(913)e-6")
+    /// </summary>
+    public static bool TryParse(ReadOnlySpan<char> value, NumberStyles styles, IFormatProvider? formatProvider,
+        out BigRational result) {
+      if (TryParseNatural(value.ToString(), styles, formatProvider, out result))
+        return true;
+      if (TryParseDecimal(value.ToString(), styles, formatProvider, out result))
+        return true;
+
+      result = NaN;
+
+      return false;
+    }
+
+    /// <summary>
+    ///     Try Parse (either natural, like "23 / 97" or decimal like "-1.45(913)e-6")
+    /// </summary>
+    public static bool TryParse(ReadOnlySpan<char> value, IFormatProvider? formatProvider, out BigRational result) {
+      NumberStyles style = NumberStyles.AllowLeadingSign |
+                           NumberStyles.AllowLeadingWhite |
+                           NumberStyles.AllowThousands |
+                           NumberStyles.AllowTrailingWhite |
+                           NumberStyles.AllowHexSpecifier;
+
+      if (TryParseNatural(value.ToString(), style, formatProvider, out result))
+        return true;
+      if (TryParseDecimal(value.ToString(), style, formatProvider, out result))
+        return true;
+
+      result = NaN;
+
+      return false;
+    }
+
+    /// <summary>
+    ///     Try Parse (either natural, like "23 / 97" or decimal like "-1.45(913)e-6")
+    /// </summary>
+    public static bool TryParse(ReadOnlySpan<char> value, out BigRational result) {
+      return TryParse(value, default, out result);
+    }
+
+    /// <summary>
+    ///     Parse
+    /// </summary>
+    public static BigRational Parse(ReadOnlySpan<char> value, NumberStyles styles, IFormatProvider? formatProvider) {
+      return TryParse(value, styles, formatProvider, out var result)
+          ? result
+          : throw new FormatException("Not a valid fraction");
+    }
+
+    /// <summary>
+    ///     Parse
+    /// </summary>
+    public static BigRational Parse(ReadOnlySpan<char> value, IFormatProvider? formatProvider) {
+      return TryParse(value, formatProvider, out var result)
+          ? result
+          : throw new FormatException("Not a valid fraction");
+    }
+
+    /// <summary>
+    ///     Parse
+    /// </summary>
+    public static BigRational Parse(ReadOnlySpan<char> value) {
+      return Parse(value, default);
+    }
+
+    #region ISpanParsable<BigRational>
+
+    #endregion ISpanParsable<BigRational>
+
+    #region IConvertible
+
+    TypeCode IConvertible.GetTypeCode() {
+      return TypeCode.Object;
+    }
+
+    bool IConvertible.ToBoolean(IFormatProvider? provider) {
+      return !IsZero;
+    }
+
+    byte IConvertible.ToByte(IFormatProvider? provider) {
+      return (byte)this;
+    }
+
+    char IConvertible.ToChar(IFormatProvider? provider) {
+      return (char)this;
+    }
+
+    DateTime IConvertible.ToDateTime(IFormatProvider? provider) {
+      return Convert.ToDateTime((double)this);
+    }
+
+    decimal IConvertible.ToDecimal(IFormatProvider? provider) {
+      return (decimal)this;
+    }
+
+    double IConvertible.ToDouble(IFormatProvider? provider) {
+      return (double)this;
+    }
+
+    short IConvertible.ToInt16(IFormatProvider? provider) {
+      return (short)this;
+    }
+
+    int IConvertible.ToInt32(IFormatProvider? provider) {
+      return (int)this;
+    }
+
+    long IConvertible.ToInt64(IFormatProvider? provider) {
+      return (long)this;
+    }
+
+    sbyte IConvertible.ToSByte(IFormatProvider? provider) {
+      return (sbyte)this;
+    }
+
+    float IConvertible.ToSingle(IFormatProvider? provider) {
+      return (float)this;
+    }
+
+    string IConvertible.ToString(IFormatProvider? provider) {
+      return ToString();
+    }
+
+    object IConvertible.ToType(Type conversionType, IFormatProvider? provider) {
+      return Convert.ChangeType((double)this, conversionType);
+    }
+
+    ushort IConvertible.ToUInt16(IFormatProvider? provider) {
+      return (ushort)this;
+    }
+
+    uint IConvertible.ToUInt32(IFormatProvider? provider) {
+      return (uint)this;
+    }
+
+    ulong IConvertible.ToUInt64(IFormatProvider? provider) {
+      return (ulong)this;
+    }
+
+    #endregion IConvertible
+
+    #region IComparable
+
+    int IComparable.CompareTo(object? obj) {
+      if (obj is null)
+        return 1;
+
+      if (TryCast(obj, out var other))
+        return CompareTo(other);
+
+      throw new ArgumentException($"Incomparable with {obj.GetType().Name}");
+    }
+
+    #endregion IComparable
+
+    #region INumber<BigRational>
+
+    #endregion INumber<BigRational>
   }
 
 }
